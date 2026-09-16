@@ -1,4 +1,4 @@
-$port = 8080
+$port = 8085
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$port/")
 $listener.Start()
@@ -243,7 +243,10 @@ Payload de consulta:
     }
 
     # Rutas estáticas de evidencias
-    if ($path -eq "/public-inventory.txt") { if (Serve-StaticFile $response "app\public-inventory.txt" "text/plain") { continue } }
+    if ($path -eq "/public-inventory.txt") { 
+        if (Serve-StaticFile $response "public-inventory.txt" "text/plain") { continue }
+        if (Serve-StaticFile $response "app\public-inventory.txt" "text/plain") { continue }
+    }
     if ($path -eq "/evidence/red/start.txt") { if (Serve-StaticFile $response "evidence\red\start.txt" "text/plain") { continue } }
     if ($path -eq "/evidence/red/nmap_port80.nmap") { if (Serve-StaticFile $response "evidence\red\nmap_port80.nmap" "text/plain") { continue } }
     if ($path -eq "/evidence/red/curl_home.txt") { if (Serve-StaticFile $response "evidence\red\curl_home.txt" "text/plain") { continue } }

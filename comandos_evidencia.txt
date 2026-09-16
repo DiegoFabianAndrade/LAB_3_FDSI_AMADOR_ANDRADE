@@ -1,50 +1,48 @@
 ====================================================================
-LABORATORIO 3 - FDSI 2026: COMANDOS PASO A PASO PARA MOSTRAR EVIDENCIA
+LABORATORIO 3 - FDSI 2026: COMANDOS EN POWERSHELL PARA PRUEBAS LOCALES (WINDOWS)
 ====================================================================
 
-1. CONFIGURACION DE VARIABLES INICIALES
+1. CONFIGURACION DE VARIABLES EN POWERSHELL
 --------------------------------------------------------------------
-$TARGET_IP = "10.2.77.122"
-$TARGET_URL = "http://10.2.77.122"
+$TARGET_URL = "http://localhost:8085"
 
-2. REGISTRO DE MARCA DE TIEMPO UTC DE INICIO
+2. MARCA DE TIEMPO UTC DE INICIO
 --------------------------------------------------------------------
 Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
 
-3. FASE RED TEAM: ESCANEO Y RECONOCIMIENTO (PORTAL Y ARCHIVOS)
+3. PRUEBAS RED TEAM (EJECUTAR EN POWERSHELL)
 --------------------------------------------------------------------
-# Escaneo de puerto 80 y detección de servicio Nginx
-nmap -Pn -sV -p 80 10.2.77.122
+# A. Peticion HTTP a la pagina principal
+curl.exe -i http://localhost:8085/
 
-# Obtención de respuesta HTTP principal
-curl.exe -i http://10.2.77.122/
+# B. Obtencion de cabeceras HTTP de seguridad
+curl.exe -I http://localhost:8085/
 
-# Obtención de cabeceras HTTP (Fuga de versión de servidor)
-curl.exe -I http://10.2.77.122/
+# C. Consulta del inventario publico de activos
+curl.exe -i http://localhost:8085/public-inventory.txt
 
-# Consulta del archivo de inventario público
-curl.exe -i http://10.2.77.122/public-inventory.txt
+# D. Consulta a la API de Alertas CrowdStrike Falcon (JSON)
+curl.exe -i http://localhost:8085/api/v1/alerts
 
-# Ráfaga de consultas a rutas no existentes (Generación de respuestas 404)
-curl.exe -s -o NUL -w "%{http_code} /.git/config`n" http://10.2.77.122/.git/config
-curl.exe -s -o NUL -w "%{http_code} /.env`n" http://10.2.77.122/.env
-curl.exe -s -o NUL -w "%{http_code} /wp-config.php`n" http://10.2.77.122/wp-config.php
-curl.exe -s -o NUL -w "%{http_code} /admin`n" http://10.2.77.122/admin
-curl.exe -s -o NUL -w "%{http_code} /backup.sql`n" http://10.2.77.122/backup.sql
+# E. Envio de agregacion POST JSON (Simulacion de escalamiento)
+curl.exe -i -X POST http://localhost:8085/api/v1/alerts/postaggregates -H "Content-Type: application/json" -d "{\"action\": \"escalate\", \"alert_id\": \"CS-INC-9942\", \"severity\": \"CRITICAL\"}"
 
-4. FASE BLUE TEAM: TELEMETRIA Y MONITOREO DE RED
+# F. Rafaga de reconocimiento de rutas (Prueba de error 404)
+curl.exe -s -o NUL -w "%{http_code} /.git/config`n" http://localhost:8085/.git/config
+curl.exe -s -o NUL -w "%{http_code} /.env`n" http://localhost:8085/.env
+curl.exe -s -o NUL -w "%{http_code} /wp-config.php`n" http://localhost:8085/wp-config.php
+curl.exe -s -o NUL -w "%{http_code} /admin`n" http://localhost:8085/admin
+curl.exe -s -o NUL -w "%{http_code} /backup.sql`n" http://localhost:8085/backup.sql
+
+4. CONSULTA DE EVIDENCIAS Y REPORTES (DESDE POWERSHELL)
 --------------------------------------------------------------------
-# Verificación de captura de paquetes en vivo con tcpdump (ejecutar en consola)
-tcpdump -i any -nn -vv "tcp port 80" -c 10
+# Ver logs de acceso grabados
+curl.exe -i http://localhost:8085/evidence/blue/access.log
 
-# Verificación de registros de acceso Nginx
-Get-Content -Path "c:\Users\diego\Downloads\LAB_3_FDSI_AMADOR_ANDRADE\evidence\blue\access.log" -Tail 20
+# Ver regla de deteccion Blue Team en Python
+curl.exe -i http://localhost:8085/evidence/blue/detection_rule.py
 
-5. FASE RETEST: VERIFICACION DE HARDENING DE NGINX
---------------------------------------------------------------------
-# Retest 1: Verificar que la cabecera Server ya no expone la versión de Nginx
-curl.exe -I http://10.2.77.122/
+# Ver configuracion Nginx Hardened
+curl.exe -i http://localhost:8085/nginx/muvautomation-after.conf
 
-# Retest 2: Verificar la denegación de acceso (HTTP 403 Forbidden) a rutas ocultas
-curl.exe -i http://10.2.77.122/.git/config
 ====================================================================
