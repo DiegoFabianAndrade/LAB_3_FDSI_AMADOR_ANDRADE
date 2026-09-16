@@ -1,0 +1,2 @@
+2026/09/16 14:12:18 [error] 1420#1420: *12 open() "/var/www/muvautomation/.git/config" failed (2: No such file or directory), client: 192.168.56.20, server: _, request: "GET /.git/config HTTP/1.1", host: "192.168.56.10"
+2026/09/16 14:12:15 [error] 1420#1420: *11 open() "/var/www/muvautomation/api/v1/unknown" failed (2: No such file or directory), client: 192.168.56.20, server: _, request: "GET /api/v1/unknown HTTP/1.1", host: "192.168.56.10"

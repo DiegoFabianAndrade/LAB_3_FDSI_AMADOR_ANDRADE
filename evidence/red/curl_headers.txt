@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+Date: Wed, 16 Sep 2026 14:06:22 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 480
+Connection: keep-alive
+X-Lab-Environment: LAB3-HTTP-UNAUTHENTICATED

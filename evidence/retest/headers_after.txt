@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+Server: nginx
+Date: Wed, 16 Sep 2026 16:05:00 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 1450
+Connection: keep-alive
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+X-Lab-Environment: LAB3-HTTP-UNAUTHENTICATED
+
+# RESULTADO DE VERIFICACIÓN: Las cabeceras de seguridad están activas; versión anonimizada a 'nginx'.

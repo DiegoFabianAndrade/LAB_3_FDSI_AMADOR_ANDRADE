@@ -1,0 +1,20 @@
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+Date: Wed, 16 Sep 2026 14:05:10 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 1450
+Connection: keep-alive
+X-Lab-Environment: LAB3-HTTP-UNAUTHENTICATED
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>MuvAutomation Lab - CrowdStrike Incident Hub</title>
+</head>
+<body>
+  <h1>MuvAutomation Asset Portal & Incident Automation</h1>
+  <p>Environment: LAB | Owner: Blue Team</p>
+  <a href="/public-inventory.txt">Inventario público de demostración</a>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>OWASP ZAP Passive Scan Report - Lab 3</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; }
+    .container { max-width: 900px; margin: auto; background: #1e293b; padding: 2rem; border-radius: 8px; border: 1px solid #334155; }
+    h1, h2 { color: #38bdf8; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #334155; padding: 0.75rem; text-align: left; }
+    th { background: #0f172a; color: #38bdf8; }
+    .badge-info { background: #0284c7; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+    .badge-low { background: #eab308; color: black; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+    .badge-medium { background: #f97316; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>OWASP ZAP Passive Scan Report</h1>
+    <p><strong>Objetivo:</strong> http://192.168.56.10/ | <strong>Modo:</strong> Escaneo Pasivo</p>
+    <h2>Resumen de Alertas</h2>
+    <table>
+      <thead>
+        <tr><th>Alerta</th><th>Nivel de Riesgo</th><th>Descripción</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Server Banner Disclosure</td><td><span class="badge-low">Bajo</span></td><td>Exposición de <code>Server: nginx/1.18.0 (Ubuntu)</code></td></tr>
+        <tr><td>Missing Security Headers</td><td><span class="badge-low">Bajo</span></td><td>Ausencia de X-Frame-Options, X-Content-Type-Options</td></tr>
+        <tr><td>Cleartext Transmission (HTTP)</td><td><span class="badge-medium">Medio</span></td><td>Tráfico en texto plano por el puerto 80</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

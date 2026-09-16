@@ -1,0 +1,23 @@
+{
+  "name": "crowdstrike-incident-hub",
+  "version": "1.0.0",
+  "description": "Prototipo de automatización de incidentes de CrowdStrike Falcon para el Laboratorio 3 (FDSI 2026)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "crowdstrike",
+    "falcon",
+    "automatizacion-incidentes",
+    "prototipo-http",
+    "fdsi-lab3"
+  ],
+  "author": "Diego Andrade & Felipe Amador",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  }
+}
