@@ -99,7 +99,7 @@ while ($listener.IsListening) {
     .badge-red { background: #b91c1c; color: white; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.2rem; }
     .section-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.3rem; }
-    .section-card h2 { font-size: 1.15rem; margin-top: 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-card h2 { font-size: 1.15rem; margin-top: 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
     .section-card h2.blue-title { color: var(--accent-blue); }
     .section-card h2.red-title { color: var(--accent-red); }
     .section-card h2.green-title { color: var(--accent-green); }
@@ -128,18 +128,18 @@ while ($listener.IsListening) {
     <div class="grid">
       <!-- Card 1: Endpoints Prototipo -->
       <div class="section-card">
-        <h2 class="blue-title">🚀 Prototipo & API CrowdStrike</h2>
+        <h2 class="blue-title">[PROTOTIPO] API CrowdStrike</h2>
         <ul>
           <li>
-            <a href="/public-inventory.txt" target="_blank">📄 Inventario P&uacute;blico (/public-inventory.txt)</a>
+            <a href="/public-inventory.txt" target="_blank">Inventario P&uacute;blico (/public-inventory.txt)</a>
             <span class="desc">Topolog&iacute;a de activos expuestos (WEB-LAB-01, API-LAB-01, DB-LAB-01).</span>
           </li>
           <li>
-            <a href="/api/v1/alerts" target="_blank">🚨 API Alertas Falcon (/api/v1/alerts)</a>
+            <a href="/api/v1/alerts" target="_blank">API Alertas Falcon (/api/v1/alerts)</a>
             <span class="desc">Consulta JSON de incidentes y clasificaci&oacute;n de triaje.</span>
           </li>
           <li>
-            <a href="/api/v1/actions" target="_blank">📋 Historial de Acciones (/api/v1/actions)</a>
+            <a href="/api/v1/actions" target="_blank">Historial de Acciones (/api/v1/actions)</a>
             <span class="desc">Registro de respuestas automatizadas y acciones defensivas.</span>
           </li>
         </ul>
@@ -147,22 +147,22 @@ while ($listener.IsListening) {
 
       <!-- Card 2: Red Team Evidencias -->
       <div class="section-card">
-        <h2 class="red-title">🔴 Evidencias Red Team (Fase C)</h2>
+        <h2 class="red-title">[RED TEAM] Evidencias (Fase C)</h2>
         <ul>
           <li>
-            <a href="/evidence/red/start.txt" target="_blank">⏱️ Marca de Tiempo de Inicio (/start.txt)</a>
+            <a href="/evidence/red/start.txt" target="_blank">Marca de Tiempo de Inicio (/start.txt)</a>
             <span class="desc">Timestamp UTC de inicio de pruebas ofensivas y variables.</span>
           </li>
           <li>
-            <a href="/evidence/red/nmap_port80.nmap" target="_blank">🔍 Escaneo de Puertos (/nmap_port80.nmap)</a>
+            <a href="/evidence/red/nmap_port80.nmap" target="_blank">Escaneo de Puertos (/nmap_port80.nmap)</a>
             <span class="desc">Resultado de Nmap identificando Nginx 1.18.0 (Ubuntu).</span>
           </li>
           <li>
-            <a href="/evidence/red/curl_headers.txt" target="_blank">🌐 Fuga de Cabeceras (/curl_headers.txt)</a>
+            <a href="/evidence/red/curl_headers.txt" target="_blank">Fuga de Cabeceras (/curl_headers.txt)</a>
             <span class="desc">Peticiones curl confirmando ausencia de security headers.</span>
           </li>
           <li>
-            <a href="/reports/zap-passive/zap-passive-report.html" target="_blank">🛡️ Reporte OWASP ZAP (/zap-passive-report.html)</a>
+            <a href="/reports/zap-passive/zap-passive-report.html" target="_blank">Reporte OWASP ZAP (/zap-passive-report.html)</a>
             <span class="desc">An&aacute;lisis pasivo de vulnerabilidades expuestas.</span>
           </li>
         </ul>
@@ -170,22 +170,22 @@ while ($listener.IsListening) {
 
       <!-- Card 3: Blue Team Evidencias & Hardening -->
       <div class="section-card">
-        <h2 class="green-title">🔵 Blue Team & Hardening (Fase D/E)</h2>
+        <h2 class="green-title">[BLUE TEAM] Evidencias & Hardening</h2>
         <ul>
           <li>
-            <a href="/evidence/blue/access.log" target="_blank">📜 Telemetr&iacute;a Nginx (/access.log)</a>
+            <a href="/evidence/blue/access.log" target="_blank">Telemetr&iacute;a Nginx (/access.log)</a>
             <span class="desc">Logs de acceso correlacionando IPs, r&aacute;fagas y User-Agents.</span>
           </li>
           <li>
-            <a href="/evidence/blue/detection_rule.py" target="_blank">⚡ Regla de Detecci&oacute;n (/detection_rule.py)</a>
-            <span class="desc">Script Python de detecci&oacute;n de r&aacute;fagas 404 (≥5 en 5 min).</span>
+            <a href="/evidence/blue/detection_rule.py" target="_blank">Regla de Detecci&oacute;n (/detection_rule.py)</a>
+            <span class="desc">Script Python de detecci&oacute;n de r&aacute;fagas 404 (5 o m&aacute;s en 5 min).</span>
           </li>
           <li>
-            <a href="/nginx/muvautomation-after.conf" target="_blank">🔒 Config Nginx Hardened (/muvautomation-after.conf)</a>
+            <a href="/nginx/muvautomation-after.conf" target="_blank">Config Nginx Hardened (/muvautomation-after.conf)</a>
             <span class="desc">Directivas server_tokens off y cabeceras de seguridad.</span>
           </li>
           <li>
-            <a href="/evidence/retest/headers_after.txt" target="_blank">✅ Retest de Seguridad (/headers_after.txt)</a>
+            <a href="/evidence/retest/headers_after.txt" target="_blank">Retest de Seguridad (/headers_after.txt)</a>
             <span class="desc">Verificaci&oacute;n de mitigaci&oacute;n y denegaci&oacute;n de rutas /.git.</span>
           </li>
         </ul>
@@ -193,22 +193,22 @@ while ($listener.IsListening) {
 
       <!-- Card 4: Modelado & Documentación -->
       <div class="section-card">
-        <h2 class="blue-title">📐 Modelado & Informes</h2>
+        <h2 class="blue-title">[DOCUMENTOS] Modelado & Informes</h2>
         <ul>
           <li>
-            <a href="/diagrams/architecture-dfd.md" target="_blank">🏗️ Arquitectura & DFD (/architecture-dfd.md)</a>
+            <a href="/diagrams/architecture-dfd.md" target="_blank">Arquitectura & DFD (/architecture-dfd.md)</a>
             <span class="desc">Diagrama de flujo de datos y 2 Fronteras de Confianza.</span>
           </li>
           <li>
-            <a href="/diagrams/stride-table.md" target="_blank">🎯 Matriz STRIDE (/stride-table.md)</a>
+            <a href="/diagrams/stride-table.md" target="_blank">Matriz STRIDE (/stride-table.md)</a>
             <span class="desc">4 Hip&oacute;tesis de ataque obligatorias (H1-H4).</span>
           </li>
           <li>
-            <a href="/risk-register.md" target="_blank">📊 Registro de Riesgos (/risk-register.md)</a>
+            <a href="/risk-register.md" target="_blank">Registro de Riesgos (/risk-register.md)</a>
             <span class="desc">Matriz de estado de riesgos (Corregido/Lab 4).</span>
           </li>
           <li>
-            <a href="/README.md" target="_blank">📖 Informe Completo (/README.md)</a>
+            <a href="/README.md" target="_blank">Informe Completo (/README.md)</a>
             <span class="desc">Preguntas de an&aacute;lisis y reflexi&oacute;n individual.</span>
           </li>
         </ul>
