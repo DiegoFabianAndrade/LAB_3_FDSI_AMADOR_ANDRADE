@@ -63,13 +63,13 @@ const requestHandler = (req, res) => {
 </head>
 <body>
   <div class="card">
-    <h1>Portal de Activos y Automatización de Incidentes</h1>
+    <h1>Portal de Activos y Automatizaci&oacute;n de Incidentes</h1>
     <p><span class="badge">Entorno: LAB</span> <span class="badge">Propietario: Blue Team</span></p>
-    <p>Bienvenido al prototipo de automatización de incidentes de <strong>CrowdStrike Falcon</strong> para el Laboratorio 3 HTTP.</p>
+    <p>Bienvenido al prototipo de automatizaci&oacute;n de incidentes de <strong>CrowdStrike Falcon</strong> para el Laboratorio 3 HTTP.</p>
     
     <h3>Recursos Disponibles:</h3>
     <ul>
-      <li><a href="/public-inventory.txt">Inventario público de demostración</a></li>
+      <li><a href="/public-inventory.txt">Inventario p&uacute;blico de demostraci&oacute;n</a></li>
       <li><a href="/api/v1/alerts">API de Alertas CrowdStrike Falcon (JSON)</a></li>
       <li><a href="/api/v1/actions">Historial de Acciones de Triaje (JSON)</a></li>
     </ul>
@@ -91,19 +91,19 @@ Payload de consulta:
   if (req.method === 'GET' && pathname === '/public-inventory.txt') {
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end(`=======================================================
-MuvAutomation - Demostración de Inventario de Activos
+MuvAutomation - Demostracion de Inventario de Activos
 =======================================================
 ID-Activo     Nombre-Host     Segmento-IP   Rol
 WEB-LAB-01    web.lab.local   192.168.56.10 Servidor Nginx / Incident Hub
 API-LAB-01    api.lab.local   192.168.56.11 API CrowdStrike Falcon Mock
 DB-LAB-01     db.lab.local    192.168.56.12 Base de Datos de Eventos
 =======================================================
-Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
+Aviso: Expuesto mediante HTTP sin autenticacion para evaluacion base.
 `);
   }
 
   if (req.method === 'GET' && pathname === '/api/v1/alerts') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify({
       meta: {
         query_time: new Date().toISOString(),
@@ -126,7 +126,7 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
         parsedBody = { raw: body };
       }
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       return res.end(JSON.stringify({
         meta: {
           status: 200,
@@ -172,7 +172,7 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
 
       actionLogs.push(actionRecord);
 
-      res.writeHead(201, { 'Content-Type': 'application/json' });
+      res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' });
       return res.end(JSON.stringify({
         status: "success",
         message: "Acción de respuesta registrada correctamente en el prototipo Falcon.",
@@ -183,14 +183,14 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
   }
 
   if (req.method === 'GET' && pathname === '/api/v1/actions') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify({
       meta: { total_actions: actionLogs.length },
       actions: actionLogs
     }, null, 2));
   }
 
-  res.writeHead(404, { 'Content-Type': 'application/json' });
+  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify({
     error: "404 Not Found",
     path: pathname,

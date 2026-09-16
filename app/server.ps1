@@ -72,13 +72,13 @@ while ($listener.IsListening) {
 </head>
 <body>
   <div class="card">
-    <h1>Portal de Activos y Automatización de Incidentes</h1>
+    <h1>Portal de Activos y Automatizaci&oacute;n de Incidentes</h1>
     <p><span class="badge">Entorno: LAB</span> <span class="badge">Propietario: Blue Team</span></p>
-    <p>Bienvenido al prototipo de automatización de incidentes de <strong>CrowdStrike Falcon</strong> para el Laboratorio 3 HTTP.</p>
+    <p>Bienvenido al prototipo de automatizaci&oacute;n de incidentes de <strong>CrowdStrike Falcon</strong> para el Laboratorio 3 HTTP.</p>
     
     <h3>Recursos Disponibles:</h3>
     <ul>
-      <li><a href="/public-inventory.txt">Inventario público de demostración</a></li>
+      <li><a href="/public-inventory.txt">Inventario p&uacute;blico de demostraci&oacute;n</a></li>
       <li><a href="/api/v1/alerts">API de Alertas CrowdStrike Falcon (JSON)</a></li>
       <li><a href="/api/v1/actions">Historial de Acciones de Triaje (JSON)</a></li>
     </ul>
@@ -107,14 +107,14 @@ Payload de consulta:
     if ($method -eq "GET" -and $path -eq "/public-inventory.txt") {
         $txt = @"
 =======================================================
-MuvAutomation - Demostración de Inventario de Activos
+MuvAutomation - Demostracion de Inventario de Activos
 =======================================================
 ID-Activo     Nombre-Host     Segmento-IP   Rol
 WEB-LAB-01    web.lab.local   192.168.56.10 Servidor Nginx / Incident Hub
 API-LAB-01    api.lab.local   192.168.56.11 API CrowdStrike Falcon Mock
 DB-LAB-01     db.lab.local    192.168.56.12 Base de Datos de Eventos
 =======================================================
-Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
+Aviso: Expuesto mediante HTTP sin autenticacion para evaluacion base.
 "@
         $buffer = [System.Text.Encoding]::UTF8.GetBytes($txt)
         $response.ContentType = "text/plain; charset=utf-8"
@@ -136,7 +136,7 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
 }
 "@
         $buffer = [System.Text.Encoding]::UTF8.GetBytes($jsonResp)
-        $response.ContentType = "application/json"
+        $response.ContentType = "application/json; charset=utf-8"
         $response.ContentLength64 = $buffer.Length
         $response.OutputStream.Write($buffer, 0, $buffer.Length)
         $response.Close()
@@ -152,14 +152,14 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
   },
   "resources": [
     {
-      "label": "Distribución por Severidad",
+      "label": "Distribucion por Severidad",
       "buckets": [
         { "count": 1, "value": "High" },
         { "count": 1, "value": "Medium" }
       ]
     },
     {
-      "label": "Activos Más Afectados",
+      "label": "Activos Mas Afectados",
       "buckets": [
         { "count": 1, "value": "WEB-LAB-01" },
         { "count": 1, "value": "API-LAB-01" }
@@ -169,7 +169,7 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
 }
 "@
         $buffer = [System.Text.Encoding]::UTF8.GetBytes($jsonResp)
-        $response.ContentType = "application/json"
+        $response.ContentType = "application/json; charset=utf-8"
         $response.ContentLength64 = $buffer.Length
         $response.OutputStream.Write($buffer, 0, $buffer.Length)
         $response.Close()
@@ -179,7 +179,7 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
     $errJson = '{"error": "404 Not Found", "message": "Endpoint no encontrado en el prototipo CrowdStrike Incident Hub."}'
     $buffer = [System.Text.Encoding]::UTF8.GetBytes($errJson)
     $response.StatusCode = 404
-    $response.ContentType = "application/json"
+    $response.ContentType = "application/json; charset=utf-8"
     $response.ContentLength64 = $buffer.Length
     $response.OutputStream.Write($buffer, 0, $buffer.Length)
     $response.Close()
