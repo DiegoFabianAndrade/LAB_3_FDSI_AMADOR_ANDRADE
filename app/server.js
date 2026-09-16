@@ -35,6 +35,16 @@ const alertStore = [
 
 const actionLogs = [];
 
+const serveStaticFile = (res, relativeFilePath, contentType) => {
+  const fullPath = path.join(__dirname, '..', relativeFilePath);
+  if (fs.existsSync(fullPath)) {
+    res.writeHead(200, { 'Content-Type': `${contentType}; charset=utf-8` });
+    return res.end(fs.readFileSync(fullPath, 'utf-8'));
+  }
+  res.writeHead(404, { 'Content-Type': 'application/json' });
+  return res.end(JSON.stringify({ error: "Archivo no encontrado en el servidor local" }));
+};
+
 const requestHandler = (req, res) => {
   res.setHeader('X-Lab-Environment', 'LAB3-HTTP-UNAUTHENTICATED');
   res.setHeader('X-Falcon-Mock-Engine', 'Active');
@@ -50,43 +60,150 @@ const requestHandler = (req, res) => {
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>MuvAutomation Lab - CrowdStrike Incident Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MuvAutomation Lab - Panel de Presentaci&oacute;n Red/Blue Team</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
-    .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 1.5rem; max-width: 850px; margin: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    h1 { color: #38bdf8; border-bottom: 2px solid #334155; padding-bottom: 0.5rem; }
-    h3 { color: #38bdf8; margin-top: 1.5rem; border-left: 3px solid #0284c7; padding-left: 0.5rem; }
-    .badge { display: inline-block; background: #0284c7; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
-    .badge-red { background: #ef4444; }
-    .badge-blue { background: #3b82f6; }
-    a { color: #38bdf8; text-decoration: none; font-weight: 500; }
-    a:hover { text-decoration: underline; }
-    pre { background: #090d16; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; color: #a7f3d0; }
-    ul li { margin-bottom: 0.5rem; }
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #151c2c;
+      --accent-blue: #38bdf8;
+      --accent-red: #f87171;
+      --accent-green: #34d399;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --border: #232e47;
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 2rem; }
+    .container { max-width: 1000px; margin: auto; }
+    .header { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.8rem; margin-bottom: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+    h1 { color: var(--accent-blue); margin: 0 0 0.5rem 0; font-size: 1.8rem; }
+    p.subtitle { color: var(--muted); margin: 0 0 1rem 0; font-size: 0.95rem; }
+    .badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .badge { padding: 0.3rem 0.7rem; border-radius: 6px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; }
+    .badge-env { background: #0284c7; color: white; }
+    .badge-blue { background: #1d4ed8; color: white; }
+    .badge-red { background: #b91c1c; color: white; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.2rem; }
+    .section-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.3rem; }
+    .section-card h2 { font-size: 1.15rem; margin-top: 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-card h2.blue-title { color: var(--accent-blue); }
+    .section-card h2.red-title { color: var(--accent-red); }
+    .section-card h2.green-title { color: var(--accent-green); }
+    ul { list-style: none; padding: 0; margin: 0; }
+    ul li { margin-bottom: 0.7rem; font-size: 0.92rem; }
+    a { color: var(--accent-blue); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+    a:hover { color: #7dd3fc; text-decoration: underline; }
+    .desc { color: var(--muted); font-size: 0.8rem; display: block; margin-top: 0.15rem; }
+    pre { background: #070a11; padding: 1rem; border-radius: 8px; border: 1px solid #1a2336; overflow-x: auto; font-size: 0.85rem; color: #a7f3d0; margin-top: 1rem; }
+    footer { text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.85rem; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Portal de Activos y Automatizaci&oacute;n de Incidentes</h1>
-    <p><span class="badge">Entorno: LAB</span> <span class="badge badge-blue">Propietario: Blue Team</span></p>
-    <p>Bienvenido al prototipo de automatizaci&oacute;n de incidentes de <strong>CrowdStrike Falcon</strong> para el Laboratorio 3 HTTP.</p>
-    
-    <h3>Recursos del Prototipo & API:</h3>
-    <ul>
-      <li><a href="/public-inventory.txt">Inventario p&uacute;blico de demostraci&oacute;n</a></li>
-      <li><a href="/api/v1/alerts">API de Alertas CrowdStrike Falcon (JSON)</a></li>
-      <li><a href="/api/v1/actions">Historial de Acciones de Triaje (JSON)</a></li>
-    </ul>
+  <div class="container">
+    <div class="header">
+      <h1>MuvAutomation Asset Portal & Incident Hub</h1>
+      <p class="subtitle">Laboratorio 3 - Aplicaci&oacute;n Web P&uacute;blica por HTTP: Construir, Atacar, Detectar, Corregir y Verificar</p>
+      <div class="badges">
+        <span class="badge badge-env">Entorno: LAB3 HTTP</span>
+        <span class="badge badge-blue">Caso: CrowdStrike Falcon (Opci&oacute;n 1)</span>
+        <span class="badge badge-red">Red / Blue Team Ready</span>
+      </div>
+      <p style="margin: 0; font-size: 0.9rem; color: #cbd5e1;">Panel centralizado local para la exposici&oacute;n interactiva de evidencias, prototipo de API y documentaci&oacute;n del laboratorio.</p>
+    </div>
 
-    <h3>Evidencias y Hallazgos Red Team & Blue Team:</h3>
-    <ul>
-      <li><span class="badge badge-red">Red Team</span> <a href="/evidence/red/curl_headers.txt" target="_blank">Reconocimiento HTTP y Fuga de Cabeceras (curl)</a></li>
-      <li><span class="badge badge-red">Red Team</span> <a href="/reports/zap-passive/zap-passive-report.html" target="_blank">Reporte de Escaneo Pasivo de Vulnerabilidades (OWASP ZAP)</a></li>
-      <li><span class="badge badge-blue">Blue Team</span> <a href="/evidence/retest/headers_after.txt" target="_blank">Verificaci&oacute;n de Hardening de Nginx (Retest)</a></li>
-    </ul>
+    <div class="grid">
+      <!-- Card 1: Endpoints Prototipo -->
+      <div class="section-card">
+        <h2 class="blue-title">🚀 Prototipo & API CrowdStrike</h2>
+        <ul>
+          <li>
+            <a href="/public-inventory.txt" target="_blank">📄 Inventario P&uacute;blico (/public-inventory.txt)</a>
+            <span class="desc">Topolog&iacute;a de activos expuestos (WEB-LAB-01, API-LAB-01, DB-LAB-01).</span>
+          </li>
+          <li>
+            <a href="/api/v1/alerts" target="_blank">🚨 API Alertas Falcon (/api/v1/alerts)</a>
+            <span class="desc">Consulta JSON de incidentes y clasificaci&oacute;n de triaje.</span>
+          </li>
+          <li>
+            <a href="/api/v1/actions" target="_blank">📋 Historial de Acciones (/api/v1/actions)</a>
+            <span class="desc">Registro de respuestas automatizadas y acciones defensivas.</span>
+          </li>
+        </ul>
+      </div>
 
-    <h3>Esquema de Agregados CrowdStrike Falcon (Endpoint API):</h3>
-    <pre>POST /api/v1/alerts/postaggregates
+      <!-- Card 2: Red Team Evidencias -->
+      <div class="section-card">
+        <h2 class="red-title">🔴 Evidencias Red Team (Fase C)</h2>
+        <ul>
+          <li>
+            <a href="/evidence/red/start.txt" target="_blank">⏱️ Marca de Tiempo de Inicio (/start.txt)</a>
+            <span class="desc">Timestamp UTC de inicio de pruebas ofensivas y variables.</span>
+          </li>
+          <li>
+            <a href="/evidence/red/nmap_port80.nmap" target="_blank">🔍 Escaneo de Puertos (/nmap_port80.nmap)</a>
+            <span class="desc">Resultado de Nmap identificando Nginx 1.18.0 (Ubuntu).</span>
+          </li>
+          <li>
+            <a href="/evidence/red/curl_headers.txt" target="_blank">🌐 Fuga de Cabeceras (/curl_headers.txt)</a>
+            <span class="desc">Peticiones curl confirmando ausencia de security headers.</span>
+          </li>
+          <li>
+            <a href="/reports/zap-passive/zap-passive-report.html" target="_blank">🛡️ Reporte OWASP ZAP (/zap-passive-report.html)</a>
+            <span class="desc">An&aacute;lisis pasivo de vulnerabilidades expuestas.</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Card 3: Blue Team Evidencias & Hardening -->
+      <div class="section-card">
+        <h2 class="green-title">🔵 Blue Team & Hardening (Fase D/E)</h2>
+        <ul>
+          <li>
+            <a href="/evidence/blue/access.log" target="_blank">📜 Telemetr&iacute;a Nginx (/access.log)</a>
+            <span class="desc">Logs de acceso correlacionando IPs, r&aacute;fagas y User-Agents.</span>
+          </li>
+          <li>
+            <a href="/evidence/blue/detection_rule.py" target="_blank">⚡ Regla de Detecci&oacute;n (/detection_rule.py)</a>
+            <span class="desc">Script Python de detecci&oacute;n de r&aacute;fagas 404 (≥5 en 5 min).</span>
+          </li>
+          <li>
+            <a href="/nginx/muvautomation-after.conf" target="_blank">🔒 Config Nginx Hardened (/muvautomation-after.conf)</a>
+            <span class="desc">Directivas server_tokens off y cabeceras de seguridad.</span>
+          </li>
+          <li>
+            <a href="/evidence/retest/headers_after.txt" target="_blank">✅ Retest de Seguridad (/headers_after.txt)</a>
+            <span class="desc">Verificaci&oacute;n de mitigaci&oacute;n y denegaci&oacute;n de rutas /.git.</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Card 4: Modelado & Documentación -->
+      <div class="section-card">
+        <h2 class="blue-title">📐 Modelado & Informes</h2>
+        <ul>
+          <li>
+            <a href="/diagrams/architecture-dfd.md" target="_blank">🏗️ Arquitectura & DFD (/architecture-dfd.md)</a>
+            <span class="desc">Diagrama de flujo de datos y 2 Fronteras de Confianza.</span>
+          </li>
+          <li>
+            <a href="/diagrams/stride-table.md" target="_blank">🎯 Matriz STRIDE (/stride-table.md)</a>
+            <span class="desc">4 Hip&oacute;tesis de ataque obligatorias (H1-H4).</span>
+          </li>
+          <li>
+            <a href="/risk-register.md" target="_blank">📊 Registro de Riesgos (/risk-register.md)</a>
+            <span class="desc">Matriz de estado de riesgos (Corregido/Lab 4).</span>
+          </li>
+          <li>
+            <a href="/README.md" target="_blank">📖 Informe Completo (/README.md)</a>
+            <span class="desc">Preguntas de an&aacute;lisis y reflexi&oacute;n individual.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 0.5rem;">Consulta de Agregados CrowdStrike Falcon (API Endpoint):</h3>
+      <pre>POST /api/v1/alerts/postaggregates
 Headers: Content-Type: application/json
 
 Payload de consulta:
@@ -94,49 +211,38 @@ Payload de consulta:
   "filter": "status:'new'+severity:'High'",
   "group_by": "agent_id"
 }</pre>
+    </div>
+
+    <footer>
+      Laboratorio 3 - FDSI 2026 | Integrantes: Felipe Amador Gonz&aacute;lez & Diego Fabi&aacute;n Andrade Dur&aacute;n
+    </footer>
   </div>
 </body>
 </html>`);
   }
 
-  if (req.method === 'GET' && pathname === '/public-inventory.txt') {
-    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-    return res.end(`=======================================================
-MuvAutomation - Demostracion de Inventario de Activos
-=======================================================
-ID-Activo     Nombre-Host     Segmento-IP   Rol
-WEB-LAB-01    web.lab.local   192.168.56.10 Servidor Nginx / Incident Hub
-API-LAB-01    api.lab.local   192.168.56.11 API CrowdStrike Falcon Mock
-DB-LAB-01     db.lab.local    192.168.56.12 Base de Datos de Eventos
-=======================================================
-Aviso: Expuesto mediante HTTP sin autenticacion para evaluacion base.
-`);
-  }
+  // Rutas estáticas de evidencias
+  if (req.method === 'GET' && pathname === '/public-inventory.txt') return serveStaticFile(res, 'app/public-inventory.txt', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/red/start.txt') return serveStaticFile(res, 'evidence/red/start.txt', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/red/nmap_port80.nmap') return serveStaticFile(res, 'evidence/red/nmap_port80.nmap', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/red/curl_home.txt') return serveStaticFile(res, 'evidence/red/curl_home.txt', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/red/curl_headers.txt') return serveStaticFile(res, 'evidence/red/curl_headers.txt', 'text/plain');
+  if (req.method === 'GET' && pathname === '/reports/zap-passive/zap-passive-report.html') return serveStaticFile(res, 'reports/zap-passive/zap-passive-report.html', 'text/html');
+  if (req.method === 'GET' && pathname === '/reports/zap-passive/zap-passive-report.md') return serveStaticFile(res, 'reports/zap-passive/zap-passive-report.md', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/blue/access.log') return serveStaticFile(res, 'evidence/blue/access.log', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/blue/error.log') return serveStaticFile(res, 'evidence/blue/error.log', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/blue/detection_rule.py') return serveStaticFile(res, 'evidence/blue/detection_rule.py', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/retest/nmap_port80.nmap') return serveStaticFile(res, 'evidence/retest/nmap_port80.nmap', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/retest/headers_after.txt') return serveStaticFile(res, 'evidence/retest/headers_after.txt', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/retest/hidden_path.txt') return serveStaticFile(res, 'evidence/retest/hidden_path.txt', 'text/plain');
+  if (req.method === 'GET' && pathname === '/nginx/muvautomation-before.conf') return serveStaticFile(res, 'nginx/muvautomation-before.conf', 'text/plain');
+  if (req.method === 'GET' && pathname === '/nginx/muvautomation-after.conf') return serveStaticFile(res, 'nginx/muvautomation-after.conf', 'text/plain');
+  if (req.method === 'GET' && pathname === '/diagrams/architecture-dfd.md') return serveStaticFile(res, 'diagrams/architecture-dfd.md', 'text/plain');
+  if (req.method === 'GET' && pathname === '/diagrams/stride-table.md') return serveStaticFile(res, 'diagrams/stride-table.md', 'text/plain');
+  if (req.method === 'GET' && pathname === '/risk-register.md') return serveStaticFile(res, 'risk-register.md', 'text/plain');
+  if (req.method === 'GET' && pathname === '/README.md') return serveStaticFile(res, 'README.md', 'text/plain');
 
-  if (req.method === 'GET' && pathname === '/evidence/red/curl_headers.txt') {
-    const filePath = path.join(__dirname, '..', 'evidence', 'red', 'curl_headers.txt');
-    if (fs.existsSync(filePath)) {
-      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-      return res.end(fs.readFileSync(filePath, 'utf-8'));
-    }
-  }
-
-  if (req.method === 'GET' && pathname === '/reports/zap-passive/zap-passive-report.html') {
-    const filePath = path.join(__dirname, '..', 'reports', 'zap-passive', 'zap-passive-report.html');
-    if (fs.existsSync(filePath)) {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      return res.end(fs.readFileSync(filePath, 'utf-8'));
-    }
-  }
-
-  if (req.method === 'GET' && pathname === '/evidence/retest/headers_after.txt') {
-    const filePath = path.join(__dirname, '..', 'evidence', 'retest', 'headers_after.txt');
-    if (fs.existsSync(filePath)) {
-      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-      return res.end(fs.readFileSync(filePath, 'utf-8'));
-    }
-  }
-
+  // Rutas API
   if (req.method === 'GET' && pathname === '/api/v1/alerts') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     return res.end(JSON.stringify({
@@ -155,34 +261,14 @@ Aviso: Expuesto mediante HTTP sin autenticacion para evaluacion base.
     req.on('data', chunk => body += chunk.toString());
     req.on('end', () => {
       let parsedBody = {};
-      try {
-        parsedBody = body ? JSON.parse(body) : {};
-      } catch (e) {
-        parsedBody = { raw: body };
-      }
+      try { parsedBody = body ? JSON.parse(body) : {}; } catch (e) { parsedBody = { raw: body }; }
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       return res.end(JSON.stringify({
-        meta: {
-          status: 200,
-          filtro_solicitado: parsedBody.filter || "ninguno",
-          timestamp: new Date().toISOString()
-        },
+        meta: { status: 200, filtro_solicitado: parsedBody.filter || "ninguno", timestamp: new Date().toISOString() },
         resources: [
-          {
-            label: "Distribución por Severidad",
-            buckets: [
-              { count: alertStore.filter(a => a.severity === 'High').length, value: "High" },
-              { count: alertStore.filter(a => a.severity === 'Medium').length, value: "Medium" }
-            ]
-          },
-          {
-            label: "Activos Más Afectados",
-            buckets: [
-              { count: 1, value: "WEB-LAB-01" },
-              { count: 1, value: "API-LAB-01" }
-            ]
-          }
+          { label: "Distribución por Severidad", buckets: [{ count: alertStore.filter(a => a.severity === 'High').length, value: "High" }, { count: alertStore.filter(a => a.severity === 'Medium').length, value: "Medium" }] },
+          { label: "Activos Más Afectados", buckets: [{ count: 1, value: "WEB-LAB-01" }, { count: 1, value: "API-LAB-01" }] }
         ]
       }, null, 2));
     });
@@ -208,29 +294,18 @@ Aviso: Expuesto mediante HTTP sin autenticacion para evaluacion base.
       actionLogs.push(actionRecord);
 
       res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' });
-      return res.end(JSON.stringify({
-        status: "success",
-        message: "Acción de respuesta registrada correctamente en el prototipo Falcon.",
-        action: actionRecord
-      }, null, 2));
+      return res.end(JSON.stringify({ status: "success", message: "Acción de respuesta registrada correctamente en el prototipo Falcon.", action: actionRecord }, null, 2));
     });
     return;
   }
 
   if (req.method === 'GET' && pathname === '/api/v1/actions') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify({
-      meta: { total_actions: actionLogs.length },
-      actions: actionLogs
-    }, null, 2));
+    return res.end(JSON.stringify({ meta: { total_actions: actionLogs.length }, actions: actionLogs }, null, 2));
   }
 
   res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-  res.end(JSON.stringify({
-    error: "404 Not Found",
-    path: pathname,
-    message: "Endpoint no encontrado en el prototipo CrowdStrike Incident Hub."
-  }));
+  res.end(JSON.stringify({ error: "404 Not Found", path: pathname, message: "Endpoint no encontrado en el prototipo CrowdStrike Incident Hub." }));
 };
 
 const server = http.createServer(requestHandler);
