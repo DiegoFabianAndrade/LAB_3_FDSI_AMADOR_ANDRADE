@@ -15,5 +15,3 @@ Referrer-Policy: no-referrer
 <hr><center>nginx</center>
 </body>
 </html>
-
-# RESULTADO DE VERIFICACIÓN: El acceso a /.git/config es bloqueado exitosamente con 403 Forbidden.

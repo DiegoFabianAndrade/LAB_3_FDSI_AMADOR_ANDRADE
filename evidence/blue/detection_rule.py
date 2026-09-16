@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
-"""
-============================================================================
-Motor de Detección de Reglas Defensivas - Blue Team (Laboratorio 3)
-Objetivo: Identificar enumeración HTTP (≥5 respuestas 404 en 5 min) y herramientas de escaneo
-============================================================================
-"""
-
 import sys
 import re
 from datetime import datetime
 from collections import defaultdict
 
 LOG_FILE = sys.argv[1] if len(sys.argv) > 1 else "evidence/blue/access.log"
-WINDOW_SECONDS = 300  # Ventana de 5 minutos
-THRESHOLD_404 = 5     # Umbral de 5 o más errores 404
+WINDOW_SECONDS = 300
+THRESHOLD_404 = 5
 
-# Patrón regex para formato estándar de acceso Nginx
 LOG_PATTERN = re.compile(
     r'^(?P<ip>\S+) \S+ \S+ \[(?P<time>[^\]]+)\] "(?P<method>\S+) (?P<path>\S+) [^"]+" (?P<status>\d+) (?P<bytes>\d+) "[^"]*" "(?P<ua>[^"]*)"'
 )
@@ -48,7 +40,6 @@ def run_detection():
                 path = match.group('path')
                 user_agent = match.group('ua')
 
-                # Regla 1: Detección de User-Agents de Reconocimiento
                 ua_lower = user_agent.lower()
                 for kw in suspicious_ua_patterns:
                     if kw in ua_lower:
@@ -60,7 +51,6 @@ def run_detection():
                             "path": path
                         })
 
-                # Regla 2: Detección de Ráfaga de Errores HTTP 404
                 if status == 404:
                     ip_404_timestamps[ip].append((time_obj, path))
 
@@ -68,7 +58,6 @@ def run_detection():
         print(f"[ERROR] No se pudo abrir el archivo de log: {LOG_FILE}")
         return
 
-    # Evaluar alertas de ráfaga 404
     burst_alerts = []
     for ip, events in ip_404_timestamps.items():
         events.sort(key=lambda x: x[0])
@@ -84,7 +73,6 @@ def run_detection():
                 })
                 break
 
-    # Imprimir resumen de alertas
     print(f"\n[RESUMEN] Alertas de User-Agent de Reconocimiento: {len(recon_ua_alerts)}")
     for alert in recon_ua_alerts:
         print(f"  [ALERTA-UA] IP: {alert['ip']} | Ruta: {alert['path']} | Agente: {alert['user_agent']}")

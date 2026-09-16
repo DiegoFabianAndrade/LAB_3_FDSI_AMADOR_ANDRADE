@@ -1,18 +1,9 @@
-/**
- * ============================================================================
- * Módulo de Automatización de Incidentes - CrowdStrike Falcon Hub
- * Proyecto: FDSI 2026 - Laboratorio 3 (HTTP Red/Blue Team)
- * Descripción: Prototipo de procesamiento y clasificación de alertas de seguridad
- * ============================================================================
- */
-
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 8080;
 
-// Base de datos ficticia de alertas de CrowdStrike Falcon (En memoria)
 const alertStore = [
   {
     id: "inc_cs_9001",
@@ -42,7 +33,6 @@ const alertStore = [
   }
 ];
 
-// Registro de acciones ejecutadas
 const actionLogs = [];
 
 const requestHandler = (req, res) => {
@@ -54,7 +44,6 @@ const requestHandler = (req, res) => {
 
   console.log(`[REGISTRO] ${new Date().toISOString()} | ${req.method} ${pathname} | User-Agent: ${req.headers['user-agent'] || 'Desconocido'}`);
 
-  // Ruta 1: Portal de activos público
   if (req.method === 'GET' && pathname === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return res.end(`<!doctype html>
@@ -74,7 +63,7 @@ const requestHandler = (req, res) => {
 </head>
 <body>
   <div class="card">
-    <h1>MuvAutomation Asset Portal & Incident Automation</h1>
+    <h1>Portal de Activos y Automatización de Incidentes</h1>
     <p><span class="badge">Entorno: LAB</span> <span class="badge">Propietario: Blue Team</span></p>
     <p>Bienvenido al prototipo de automatización de incidentes de <strong>CrowdStrike Falcon</strong> para el Laboratorio 3 HTTP.</p>
     
@@ -99,7 +88,6 @@ Payload de consulta:
 </html>`);
   }
 
-  // Ruta 2: Archivo de inventario público
   if (req.method === 'GET' && pathname === '/public-inventory.txt') {
     res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end(`=======================================================
@@ -114,7 +102,6 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
 `);
   }
 
-  // Ruta 3: API de Alertas CrowdStrike Falcon
   if (req.method === 'GET' && pathname === '/api/v1/alerts') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({
@@ -128,7 +115,6 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
     }, null, 2));
   }
 
-  // Ruta 4: Endpoint de agregados (POST /api/v1/alerts/postaggregates)
   if (req.method === 'POST' && pathname === '/api/v1/alerts/postaggregates') {
     let body = '';
     req.on('data', chunk => body += chunk.toString());
@@ -168,7 +154,6 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
     return;
   }
 
-  // Ruta 5: Registro de escalamiento y triaje (POST /api/v1/alerts/escalate)
   if (req.method === 'POST' && pathname === '/api/v1/alerts/escalate') {
     let body = '';
     req.on('data', chunk => body += chunk.toString());
@@ -197,7 +182,6 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
     return;
   }
 
-  // Ruta 6: Historial de acciones (GET /api/v1/actions)
   if (req.method === 'GET' && pathname === '/api/v1/actions') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({
@@ -206,7 +190,6 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
     }, null, 2));
   }
 
-  // Manejador 404
   res.writeHead(404, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({
     error: "404 Not Found",
@@ -218,9 +201,5 @@ Aviso: Expuesto mediante HTTP sin autenticación para evaluación base.
 const server = http.createServer(requestHandler);
 
 server.listen(PORT, () => {
-  console.log(`===========================================================`);
-  console.log(`Servidor CrowdStrike Incident Hub en ejecución`);
-  console.log(`URL: http://localhost:${PORT}/`);
-  console.log(`Entorno: HTTP sin autenticación (FDSI LAB 3)`);
-  console.log(`===========================================================`);
+  console.log(`Servidor CrowdStrike Incident Hub en ejecución en puerto ${PORT}`);
 });

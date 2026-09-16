@@ -8,5 +8,3 @@ X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
 Referrer-Policy: no-referrer
 X-Lab-Environment: LAB3-HTTP-UNAUTHENTICATED
-
-# RESULTADO DE VERIFICACIÓN: Las cabeceras de seguridad están activas; versión anonimizada a 'nginx'.

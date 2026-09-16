@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-============================================================================
-Módulo de Automatización de Incidentes - CrowdStrike Falcon Python Server
-Proyecto: FDSI 2026 - Laboratorio 3 (HTTP Red/Blue Team)
-============================================================================
-"""
-
 import http.server
 import socketserver
 import json
@@ -72,7 +65,7 @@ class FalconHubHandler(http.server.BaseHTTPRequestHandler):
 </head>
 <body>
   <div class="card">
-    <h1>MuvAutomation Asset Portal & CrowdStrike Falcon Hub [Python]</h1>
+    <h1>Portal de Activos y CrowdStrike Falcon Hub [Python]</h1>
     <p>Entorno: LAB | Propietario: Blue Team</p>
     <ul>
       <li><a href="/public-inventory.txt">Inventario público de demostración</a></li>
@@ -157,6 +150,6 @@ DB-LAB-01     db.lab.local    192.168.56.12 Base de Datos de Eventos
         self.wfile.write(json.dumps({"error": "404 Not Found"}).encode("utf-8"))
 
 if __name__ == "__main__":
-    print(f"[REGISTRO] Iniciando Servidor Falcon Hub Python en puerto {PORT}...")
+    print(f"Iniciando Servidor Falcon Hub Python en puerto {PORT}...")
     with socketserver.TCPServer(("", PORT), FalconHubHandler) as httpd:
         httpd.serve_forever()
