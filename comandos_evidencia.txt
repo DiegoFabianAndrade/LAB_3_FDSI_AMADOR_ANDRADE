@@ -1,0 +1,50 @@
+====================================================================
+LABORATORIO 3 - FDSI 2026: COMANDOS PASO A PASO PARA MOSTRAR EVIDENCIA
+====================================================================
+
+1. CONFIGURACION DE VARIABLES INICIALES
+--------------------------------------------------------------------
+$TARGET_IP = "10.2.77.122"
+$TARGET_URL = "http://10.2.77.122"
+
+2. REGISTRO DE MARCA DE TIEMPO UTC DE INICIO
+--------------------------------------------------------------------
+Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
+
+3. FASE RED TEAM: ESCANEO Y RECONOCIMIENTO (PORTAL Y ARCHIVOS)
+--------------------------------------------------------------------
+# Escaneo de puerto 80 y detección de servicio Nginx
+nmap -Pn -sV -p 80 10.2.77.122
+
+# Obtención de respuesta HTTP principal
+curl.exe -i http://10.2.77.122/
+
+# Obtención de cabeceras HTTP (Fuga de versión de servidor)
+curl.exe -I http://10.2.77.122/
+
+# Consulta del archivo de inventario público
+curl.exe -i http://10.2.77.122/public-inventory.txt
+
+# Ráfaga de consultas a rutas no existentes (Generación de respuestas 404)
+curl.exe -s -o NUL -w "%{http_code} /.git/config`n" http://10.2.77.122/.git/config
+curl.exe -s -o NUL -w "%{http_code} /.env`n" http://10.2.77.122/.env
+curl.exe -s -o NUL -w "%{http_code} /wp-config.php`n" http://10.2.77.122/wp-config.php
+curl.exe -s -o NUL -w "%{http_code} /admin`n" http://10.2.77.122/admin
+curl.exe -s -o NUL -w "%{http_code} /backup.sql`n" http://10.2.77.122/backup.sql
+
+4. FASE BLUE TEAM: TELEMETRIA Y MONITOREO DE RED
+--------------------------------------------------------------------
+# Verificación de captura de paquetes en vivo con tcpdump (ejecutar en consola)
+tcpdump -i any -nn -vv "tcp port 80" -c 10
+
+# Verificación de registros de acceso Nginx
+Get-Content -Path "c:\Users\diego\Downloads\LAB_3_FDSI_AMADOR_ANDRADE\evidence\blue\access.log" -Tail 20
+
+5. FASE RETEST: VERIFICACION DE HARDENING DE NGINX
+--------------------------------------------------------------------
+# Retest 1: Verificar que la cabecera Server ya no expone la versión de Nginx
+curl.exe -I http://10.2.77.122/
+
+# Retest 2: Verificar la denegación de acceso (HTTP 403 Forbidden) a rutas ocultas
+curl.exe -i http://10.2.77.122/.git/config
+====================================================================
