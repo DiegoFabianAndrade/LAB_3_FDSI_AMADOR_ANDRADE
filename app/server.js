@@ -167,6 +167,10 @@ const requestHandler = (req, res) => {
             <span class="desc">Script Python de detecci&oacute;n de r&aacute;fagas 404 (5 o m&aacute;s en 5 min).</span>
           </li>
           <li>
+            <a href="/evidence/blue/captura_wireshark_real.png" target="_blank">Captura de Evidencia Wireshark (/captura_wireshark_real.png)</a>
+            <span class="desc">Captura de pantalla de inspecci&oacute;n de paquetes HTTP en claro.</span>
+          </li>
+          <li>
             <a href="/nginx/muvautomation-after.conf" target="_blank">Config Nginx Hardened (/muvautomation-after.conf)</a>
             <span class="desc">Directivas server_tokens off y cabeceras de seguridad.</span>
           </li>
@@ -231,6 +235,7 @@ Payload de consulta:
   if (req.method === 'GET' && pathname === '/evidence/blue/access.log') return serveStaticFile(res, 'evidence/blue/access.log', 'text/plain');
   if (req.method === 'GET' && pathname === '/evidence/blue/error.log') return serveStaticFile(res, 'evidence/blue/error.log', 'text/plain');
   if (req.method === 'GET' && pathname === '/evidence/blue/detection_rule.py') return serveStaticFile(res, 'evidence/blue/detection_rule.py', 'text/plain');
+  if (req.method === 'GET' && pathname === '/evidence/blue/captura_wireshark_real.png') return serveStaticFile(res, 'evidence/blue/captura_wireshark_real.png', 'image/png');
   if (req.method === 'GET' && pathname === '/evidence/retest/nmap_port80.nmap') return serveStaticFile(res, 'evidence/retest/nmap_port80.nmap', 'text/plain');
   if (req.method === 'GET' && pathname === '/evidence/retest/headers_after.txt') return serveStaticFile(res, 'evidence/retest/headers_after.txt', 'text/plain');
   if (req.method === 'GET' && pathname === '/evidence/retest/hidden_path.txt') return serveStaticFile(res, 'evidence/retest/hidden_path.txt', 'text/plain');

@@ -39,6 +39,10 @@ Para consultar la descripción detallada de las 2 Fronteras de Confianza (**TB-0
 
 La matriz completa de modelado de amenazas con las 4 hipótesis obligatorias (**H1-H4**) basadas estrictamente en la infraestructura Nginx + HTTP + Archivos Estáticos se encuentra en [stride-table.md](diagrams/stride-table.md).
 
+### Captura de Evidencia Wireshark (Inspección de Tráfico HTTP en Vivo)
+
+![Captura de Evidencia Wireshark](evidence/blue/captura_wireshark_real.png)
+
 ---
 
 ## 4. Variables del Entorno de la VM
