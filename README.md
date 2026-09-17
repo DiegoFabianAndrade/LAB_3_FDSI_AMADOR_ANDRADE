@@ -130,6 +130,7 @@ sudo tcpdump -i any -nn -vv "tcp port 80" -w evidence/blue/lab3-http.pcap
 
 * **Ejecución del Motor de Detección (Estado: PASS) y Configuración Hardened Nginx**:
   ![Motor Detección PASS y Hardening Nginx](evidence/blue/captura_powershell_hardening_conf.png)
+  ![Detalle Configuración Hardened Nginx](evidence/blue/captura_powershell_nginx_conf_detail.png)
 
 ### 5.4 Hardening de Nginx y Retest (Fase E & F)
 
