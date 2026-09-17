@@ -99,6 +99,12 @@ done
 * **Consulta de Inventario Público de Activos (`curl.exe -i http://localhost:8085/public-inventory.txt`)**:
   ![Consulta Inventario Público](evidence/red/captura_powershell_curl_inventory.png)
 
+* **Inspección de Alertas CrowdStrike Falcon Hub API (`curl.exe -i http://localhost:8085/api/v1/alerts`)**:
+  ![Alertas CrowdStrike Falcon API](evidence/red/captura_powershell_api_alerts.png)
+
+* **Post-Agregación de Alertas y Ráfaga de Escaneo HTTP 404 (`POST /api/v1/alerts/postaggregates` y peticiones 404)**:
+  ![POST Agregación y Escaneo 404](evidence/red/captura_powershell_post_burst.png)
+
 * **Inspección de Estructura HTML y Tarjetas de Evidencias**:
   ![Estructura HTML Tarjetas](evidence/red/captura_powershell_html_cards.png)
   ![Estructura HTML Detalles](evidence/red/captura_powershell_html_details.png)
@@ -113,6 +119,17 @@ sudo tail -f /var/log/nginx/access.log
 # Captura de paquetes en vivo en la interfaz de red con tcpdump
 sudo tcpdump -i any -nn -vv "tcp port 80" -w evidence/blue/lab3-http.pcap
 ```
+
+#### Capturas de Telemetría y Detección Blue Team (PowerShell)
+
+* **Registro de Logs de Acceso HTTP Nginx (`/evidence/blue/access.log`)**:
+  ![Logs de Acceso Nginx](evidence/blue/captura_powershell_access_log.png)
+
+* **Regla de Detección de Amenazas en Python (`/evidence/blue/detection_rule.py`)**:
+  ![Regla de Detección Python](evidence/blue/captura_powershell_detection_rule.png)
+
+* **Ejecución del Motor de Detección (Estado: PASS) y Configuración Hardened Nginx**:
+  ![Motor Detección PASS y Hardening Nginx](evidence/blue/captura_powershell_hardening_conf.png)
 
 ### 5.4 Hardening de Nginx y Retest (Fase E & F)
 
