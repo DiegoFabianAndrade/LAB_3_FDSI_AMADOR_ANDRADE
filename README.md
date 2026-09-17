@@ -91,6 +91,19 @@ for path in /.git/config /.env /wp-config.php /admin /backup.sql; do
 done
 ```
 
+#### Capturas de Consola Realizadas (Evidencia en Vivo en PowerShell)
+
+* **Respuesta HTTP Principal y Cabeceras (`curl.exe -i http://localhost:8085/`)**:
+  ![Respuesta HTTP Localhost](evidence/red/captura_powershell_curl_home.png)
+
+* **Consulta de Inventario Público de Activos (`curl.exe -i http://localhost:8085/public-inventory.txt`)**:
+  ![Consulta Inventario Público](evidence/red/captura_powershell_curl_inventory.png)
+
+* **Inspección de Estructura HTML y Tarjetas de Evidencias**:
+  ![Estructura HTML Tarjetas](evidence/red/captura_powershell_html_cards.png)
+  ![Estructura HTML Detalles](evidence/red/captura_powershell_html_details.png)
+  ![Estructura HTML Footer](evidence/red/captura_powershell_html_footer.png)
+
 ### 5.3 Monitoreo y Análisis defensivo Blue Team (Fase D)
 
 ```bash
