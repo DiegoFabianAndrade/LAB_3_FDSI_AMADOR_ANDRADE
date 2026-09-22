@@ -3,11 +3,11 @@ MUVAUTOMATION ASSET PORTAL - DEMO INVENTORY (LAB 3 FDSI)
 ====================================================================
 Environment: LAB3-HTTP-UNAUTHENTICATED
 Owner: Blue Team Defense Unit
-Date: 2026-09-16
+Date: 2026-09-22
 
 PUBLIC ASSETS LIST:
 --------------------------------------------------------------------
-1. WEB-LAB-01 | Host: 10.2.77.122 | Port: 80/TCP  | Service: Nginx Web Server
-2. API-LAB-01 | Host: 10.2.77.122 | Port: 8080/TCP| Service: CrowdStrike Falcon Hub API
-3. DB-LAB-01  | Host: 10.2.77.122 | Port: 5432/TCP| Service: PostgreSQL Database (Internal)
+1. WEB-LAB-01 | Port: 80/TCP   | Service: Nginx Web Server
+2. API-LAB-01 | Port: 8080/TCP | Service: CrowdStrike Falcon Hub API
+3. DB-LAB-01  | Port: 5432/TCP | Service: PostgreSQL Database (Internal)
 ====================================================================

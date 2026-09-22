@@ -1,7 +1,7 @@
 # OWASP ZAP Reporte de Escaneo Pasivo - Laboratorio 3
 
-**URL Objetivo**: `http://192.168.56.10/`  
-**Fecha**: Wed, 16 Sep 2026 14:10:00 GMT  
+**URL Objetivo**: `http://127.0.0.1/`  
+**Fecha**: 2026-09-22  
 **Modo de Escaneo**: Escaneo Pasivo (Sin cargas útiles destructivas)  
 
 ---
@@ -10,7 +10,7 @@
 
 | Alerta / Riesgo | Nivel de Riesgo | Fiabilidad | Descripción |
 |---|---|---|---|
-| **Exposición de Banner del Servidor** | Bajo / Info | Alta | La cabecera Server del HTTP filtra software y versión exacta (`Server: nginx/1.18.0 (Ubuntu)`). |
+| **Exposición de Banner del Servidor** | Bajo / Info | Alta | La cabecera Server del HTTP filtra software y versión exacta (`Server: nginx/1.28.3`). |
 | **Ausencia de Cabecera X-Frame-Options** | Bajo | Alta | La protección contra Clickjacking está ausente en las respuestas HTTP. |
 | **Ausencia de Cabecera X-Content-Type-Options** | Bajo | Alta | La prevención de MIME-sniffing (`nosniff`) está ausente. |
 | **Ausencia de Cabecera Referrer-Policy** | Info | Alta | La política de Referrer está ausente, permitiendo fuga de rutas al navegar externamente. |
@@ -21,11 +21,11 @@
 ## Desglose Detallado de Alertamientos
 
 ### 1. Exposición de Versión del Servidor (STRIDE: H2 - Information Disclosure)
-- **URL**: `http://192.168.56.10/`
-- **Cabecera**: `Server: nginx/1.18.0 (Ubuntu)`
-- **Impacto**: Permite identificar vulnerabilidades conocidas asociadas a la versión 1.18.0 de Nginx.
+- **URL**: `http://127.0.0.1/`
+- **Cabecera**: `Server: nginx/1.28.3`
+- **Impacto**: Permite identificar vulnerabilidades conocidas asociadas a la versión de Nginx.
 - **Remediación**: Configurar `server_tokens off;` en Nginx.
 
 ### 2. Ausencia de Cabeceras de Seguridad (STRIDE: H2 / H4)
 - **Cabeceras Faltantes**: `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`
-- **Remediación**: Añadir cabeceras en la configuración de Nginx.
+- **Remediación**: Añadir directivas `add_header` en la configuración del virtual host de Nginx.

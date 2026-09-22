@@ -1,10 +1,10 @@
 ====================================================================
-LABORATORIO 3 - FDSI 2026: COMANDOS EN POWERSHELL PARA PRUEBAS LOCALES (WINDOWS)
+LABORATORIO 3 - FDSI 2026: COMANDOS EN POWERSHELL PARA PRUEBAS (WINDOWS)
 ====================================================================
 
 1. CONFIGURACION DE VARIABLES EN POWERSHELL
 --------------------------------------------------------------------
-$TARGET_URL = "http://localhost:8085"
+$TARGET_URL = "http://127.0.0.1"
 
 2. MARCA DE TIEMPO UTC DE INICIO
 --------------------------------------------------------------------
@@ -13,36 +13,27 @@ Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
 3. PRUEBAS RED TEAM (EJECUTAR EN POWERSHELL)
 --------------------------------------------------------------------
 # A. Peticion HTTP a la pagina principal
-curl.exe -i http://localhost:8085/
+curl.exe -i http://127.0.0.1/
 
 # B. Obtencion de cabeceras HTTP de seguridad
-curl.exe -I http://localhost:8085/
+curl.exe -I http://127.0.0.1/
 
 # C. Consulta del inventario publico de activos
-curl.exe -i http://localhost:8085/public-inventory.txt
+curl.exe -i http://127.0.0.1/public-inventory.txt
 
-# D. Consulta a la API de Alertas CrowdStrike Falcon (JSON)
-curl.exe -i http://localhost:8085/api/v1/alerts
+# D. Rafaga de reconocimiento de rutas (Prueba de error 404)
+curl.exe -s -o NUL -w "%{http_code} /.git/config`n" http://127.0.0.1/.git/config
+curl.exe -s -o NUL -w "%{http_code} /.env`n" http://127.0.0.1/.env
+curl.exe -s -o NUL -w "%{http_code} /wp-config.php`n" http://127.0.0.1/wp-config.php
+curl.exe -s -o NUL -w "%{http_code} /admin`n" http://127.0.0.1/admin
+curl.exe -s -o NUL -w "%{http_code} /backup.sql`n" http://127.0.0.1/backup.sql
 
-# E. Envio de agregacion POST JSON (Simulacion de escalamiento)
-curl.exe -i -X POST http://localhost:8085/api/v1/alerts/postaggregates -H "Content-Type: application/json" -d "{\"action\": \"escalate\", \"alert_id\": \"CS-INC-9942\", \"severity\": \"CRITICAL\"}"
-
-# F. Rafaga de reconocimiento de rutas (Prueba de error 404)
-curl.exe -s -o NUL -w "%{http_code} /.git/config`n" http://localhost:8085/.git/config
-curl.exe -s -o NUL -w "%{http_code} /.env`n" http://localhost:8085/.env
-curl.exe -s -o NUL -w "%{http_code} /wp-config.php`n" http://localhost:8085/wp-config.php
-curl.exe -s -o NUL -w "%{http_code} /admin`n" http://localhost:8085/admin
-curl.exe -s -o NUL -w "%{http_code} /backup.sql`n" http://localhost:8085/backup.sql
-
-4. CONSULTA DE EVIDENCIAS Y REPORTES (DESDE POWERSHELL)
+4. RETEST POST-HARDENING (DESDE POWERSHELL)
 --------------------------------------------------------------------
-# Ver logs de acceso grabados
-curl.exe -i http://localhost:8085/evidence/blue/access.log
+# Validar cabeceras post-hardening (Server: nginx sin version)
+curl.exe -I http://127.0.0.1/
 
-# Ver regla de deteccion Blue Team en Python
-curl.exe -i http://localhost:8085/evidence/blue/detection_rule.py
-
-# Ver configuracion Nginx Hardened
-curl.exe -i http://localhost:8085/nginx/muvautomation-after.conf
+# Validar bloqueo de ruta oculta (403 Forbidden)
+curl.exe -i http://127.0.0.1/.git/config
 
 ====================================================================

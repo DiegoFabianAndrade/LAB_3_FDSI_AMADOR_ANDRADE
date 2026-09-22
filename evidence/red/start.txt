@@ -1,14 +1,1 @@
-===========================================================
-MARCA DE TIEMPO DE INICIO DE RECONOCIMIENTO - RED TEAM
-===========================================================
-Timestamp UTC: 2026-09-16T14:00:00Z
-IP Objetivo: 192.168.56.10
-URL Objetivo: http://192.168.56.10
-CIDR Autorizado: 192.168.56.0/24
-Operador: Estación Red Team / Kali Linux
-===========================================================
-Variables de Entorno:
-export TARGET_IP=192.168.56.10
-export TARGET_URL=http://192.168.56.10
-export LAB_CIDR=192.168.56.0/24
-===========================================================
+2026-09-22T22:38:25Z

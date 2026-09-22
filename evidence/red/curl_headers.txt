@@ -1,7 +1,10 @@
 HTTP/1.1 200 OK
-Server: nginx/1.18.0 (Ubuntu)
-Date: Wed, 16 Sep 2026 14:06:22 GMT
-Content-Type: text/plain; charset=utf-8
-Content-Length: 480
+Server: nginx/1.28.3
+Date: Tue, 22 Sep 2026 22:38:31 GMT
+Content-Type: text/plain
+Content-Length: 641
+Last-Modified: Tue, 22 Sep 2026 22:31:18 GMT
 Connection: keep-alive
-X-Lab-Environment: LAB3-HTTP-UNAUTHENTICATED
+ETag: "6ab301b6-281"
+Accept-Ranges: bytes
+

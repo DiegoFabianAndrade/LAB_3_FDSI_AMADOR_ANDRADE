@@ -1,10 +1,13 @@
 HTTP/1.1 200 OK
 Server: nginx
-Date: Wed, 16 Sep 2026 16:05:00 GMT
-Content-Type: text/html; charset=utf-8
-Content-Length: 1450
+Date: Tue, 22 Sep 2026 22:39:22 GMT
+Content-Type: text/html
+Content-Length: 279
+Last-Modified: Tue, 22 Sep 2026 22:31:18 GMT
 Connection: keep-alive
+ETag: "6ab301b6-117"
 X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
 Referrer-Policy: no-referrer
-X-Lab-Environment: LAB3-HTTP-UNAUTHENTICATED
+Accept-Ranges: bytes
+

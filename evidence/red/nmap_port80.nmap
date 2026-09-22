@@ -1,13 +1,9 @@
-# Nmap 7.94 scan initiated Wed Sep 16 14:02:15 2026 as: nmap -Pn -sV -p 80 -oA evidence/red/nmap_port80 192.168.56.10
-Nmap scan report for 192.168.56.10
-Host is up (0.00042s latency).
+# Nmap 7.98 scan initiated Tue Sep 22 17:38:25 2026 as: nmap -Pn -sV -p 80 -oA evidence/red/nmap_port80 127.0.0.1
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.000054s latency).
 
 PORT   STATE SERVICE VERSION
-80/tcp open  http    nginx 1.18.0 (Ubuntu)
-|_http-title: MuvAutomation Lab - CrowdStrike Incident Hub
-|_http-server-header: nginx/1.18.0 (Ubuntu)
-
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+80/tcp open  http    nginx 1.28.3
 
 Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-# Nmap done at Wed Sep 16 14:02:16 2026 -- 1 IP address (1 host up) scanned in 0.45 seconds
+# Nmap done at Tue Sep 22 17:38:31 2026 -- 1 IP address (1 host up) scanned in 6.32 seconds
