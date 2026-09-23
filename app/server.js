@@ -2,7 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.env.PORT || 8080;
+const DEFAULT_PORT = process.env.PORT || 80;
+const FALLBACK_PORT = 8085;
 
 const alertStore = [
   {
@@ -313,6 +314,17 @@ Payload de consulta:
 
 const server = http.createServer(requestHandler);
 
-server.listen(PORT, () => {
-  console.log(`Servidor CrowdStrike Incident Hub en ejecución en puerto ${PORT}`);
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE' || err.code === 'EACCES') {
+    console.log(`Puerto ${DEFAULT_PORT} en uso o restringido. Intentando en puerto ${FALLBACK_PORT}...`);
+    server.listen(FALLBACK_PORT, () => {
+      console.log(`Servidor CrowdStrike Incident Hub en ejecución en puerto ${FALLBACK_PORT}`);
+    });
+  } else {
+    console.error('Error al iniciar el servidor:', err);
+  }
+});
+
+server.listen(DEFAULT_PORT, () => {
+  console.log(`Servidor CrowdStrike Incident Hub en ejecución en puerto ${DEFAULT_PORT}`);
 });

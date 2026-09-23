@@ -43,9 +43,7 @@ Para consultar la descripción detallada, revise [architecture-dfd.md](diagrams/
 
 La matriz completa de modelado de amenazas con las 4 hipótesis obligatorias (**H1-H4**) se encuentra en [stride-table.md](diagrams/stride-table.md).
 
-### Captura de Evidencia Wireshark (Inspección de Tráfico HTTP en Claro — H1)
-
-Inspección de la conversación TCP/HTTP (`tcp.stream eq 11`) dentro del archivo [lab3-http.pcap](evidence/blue/lab3-http.pcap) demostrando que la solicitud y la respuesta con el inventario de activos transitan en texto plano:
+Inspección de la conversación TCP/HTTP en vivo (`tcp.stream eq 14` en `Adapter for loopback traffic capture`) demostrando que la solicitud `GET /public-inventory.txt` y la respuesta HTTP 200 con la topología de activos transitan en texto claro sin cifrado:
 
 ![Captura de Evidencia Wireshark](evidence/blue/captura_wireshark_real.png)
 
