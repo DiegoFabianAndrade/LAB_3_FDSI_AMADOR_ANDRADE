@@ -1,39 +1,105 @@
-====================================================================
-LABORATORIO 3 - FDSI 2026: COMANDOS EN POWERSHELL PARA PRUEBAS (WINDOWS)
-====================================================================
+================================================================================
+GUIA PASO A PASO DE SUSTENTACION EN VIVO - LABORATORIO 3 (FDSI 2026)
+Portal de Automatizacion de Activos MuVAutomation (Nginx en Ubuntu WSL2 / Windows)
+Integrantes: Diego Fabian Andrade Duran & Felipe Amador Gonzalez
+================================================================================
 
-1. CONFIGURACION DE VARIABLES EN POWERSHELL
---------------------------------------------------------------------
-$TARGET_URL = "http://127.0.0.1"
+--------------------------------------------------------------------------------
+1. VERIFICACION DEL SERVIDOR Y ESTADO INICIAL
+--------------------------------------------------------------------------------
+En Windows (PowerShell / CMD):
+  curl.exe -i http://127.0.0.1/
+  curl.exe -i http://127.0.0.1/public-inventory.txt
 
-2. MARCA DE TIEMPO UTC DE INICIO
---------------------------------------------------------------------
-Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
+En WSL Ubuntu:
+  wsl -d Ubuntu bash -c "service nginx status"
+  wsl -d Ubuntu bash -c "curl -i http://127.0.0.1/"
 
-3. PRUEBAS RED TEAM (EJECUTAR EN POWERSHELL)
---------------------------------------------------------------------
-# A. Peticion HTTP a la pagina principal
-curl.exe -i http://127.0.0.1/
+--------------------------------------------------------------------------------
+2. SUSTENTACION H1: INFORMATION DISCLOSURE (TRAFICO EN CLARO POR HTTP)
+--------------------------------------------------------------------------------
+Objetivo: Demostrar que HTTP transmite datos sin cifrar en la frontera TB-01.
 
-# B. Obtencion de cabeceras HTTP de seguridad
-curl.exe -I http://127.0.0.1/
+Paso a Paso en Wireshark:
+  1. Abrir Wireshark en Windows.
+  2. Seleccionar la interfaz: "Adapter for loopback traffic capture" (o vEthernet WSL).
+  3. Filtrar por: http
+  4. En CMD/PowerShell ejecutar: curl.exe http://127.0.0.1/public-inventory.txt
+  5. En Wireshark, clic derecho en el paquete GET /public-inventory.txt -> Follow -> HTTP Stream.
+  6. Mostrar el texto plano de los activos (WEB-LAB-01, API-LAB-01, DB-LAB-01).
 
-# C. Consulta del inventario publico de activos
-curl.exe -i http://127.0.0.1/public-inventory.txt
+Evidencia Guardada:
+  - Imagen: evidence/blue/captura_wireshark_real.png
+  - Captura PCAP: evidence/blue/lab3-http.pcap
 
-# D. Rafaga de reconocimiento de rutas (Prueba de error 404)
-curl.exe -s -o NUL -w "%{http_code} /.git/config`n" http://127.0.0.1/.git/config
-curl.exe -s -o NUL -w "%{http_code} /.env`n" http://127.0.0.1/.env
-curl.exe -s -o NUL -w "%{http_code} /wp-config.php`n" http://127.0.0.1/wp-config.php
-curl.exe -s -o NUL -w "%{http_code} /admin`n" http://127.0.0.1/admin
-curl.exe -s -o NUL -w "%{http_code} /backup.sql`n" http://127.0.0.1/backup.sql
+--------------------------------------------------------------------------------
+3. SUSTENTACION H2: INFORMATION DISCLOSURE (FUGA DE VERSIONES Y HARDENING)
+--------------------------------------------------------------------------------
+Objetivo: Demostrar la fuga de versiones antes del hardening y la correccion posterior.
 
-4. RETEST POST-HARDENING (DESDE POWERSHELL)
---------------------------------------------------------------------
-# Validar cabeceras post-hardening (Server: nginx sin version)
-curl.exe -I http://127.0.0.1/
+A. Verificacion Ofensiva Red Team (Antes del Hardening):
+  - Consultar respuesta inicial y cabeceras:
+      curl.exe -I http://127.0.0.1/
+  - Muestra la cabecera "Server: nginx" sin version (o la version Nginx en logs).
+  - Escaneo Nmap:
+      wsl -d Ubuntu bash -c "nmap -Pn -sV -p 80 127.0.0.1"
+      Evidencia guardada: evidence/red/nmap_port80.nmap
 
-# Validar bloqueo de ruta oculta (403 Forbidden)
-curl.exe -i http://127.0.0.1/.git/config
+B. Verificacion de Hardening Aplicado (Post-Hardening):
+  - Cabeceras de Seguridad activas (nosniff, DENY, no-referrer):
+      curl.exe -I http://127.0.0.1/
+  - Bloqueo de rutas ocultas / metadatos sensibles (Retorna 403 Forbidden):
+      curl.exe -i http://127.0.0.1/.git/config
+  - Archivo de configuracion auditado:
+      nginx/muvautomation-after.conf
+  - Evidencia guardada:
+      evidence/retest/headers_after.txt
+      evidence/retest/hidden_path.txt
 
-====================================================================
+--------------------------------------------------------------------------------
+4. SUSTENTACION H3: REPUDIATION (TELEMETRIA Y DETECCION BLUE TEAM)
+--------------------------------------------------------------------------------
+Objetivo: Demostrar trazabilidad en logs y la ejecucion de la regla de deteccion SIEM.
+
+A. Rafaga de Reconocimiento Ofensivo (Generacion de Logs 404):
+  En Windows (CMD / PowerShell):
+    curl.exe -s -o NUL -w "%{http_code} /.git/config`n" http://127.0.0.1/.git/config
+    curl.exe -s -o NUL -w "%{http_code} /.env`n" http://127.0.0.1/.env
+    curl.exe -s -o NUL -w "%{http_code} /wp-config.php`n" http://127.0.0.1/wp-config.php
+    curl.exe -s -o NUL -w "%{http_code} /admin`n" http://127.0.0.1/admin
+    curl.exe -s -o NUL -w "%{http_code} /backup.sql`n" http://127.0.0.1/backup.sql
+
+B. Inspeccion Defensiva de Logs Nginx:
+  - Archivo de registro: evidence/blue/access.log
+  - Muestra IP origen (127.0.0.1), timestamp UTC, metodo HTTP, codigo 404 y User-Agent.
+
+C. Ejecucion del Motor de Deteccion en Python:
+  En Windows / WSL:
+    python evidence/blue/detection_rule.py evidence/blue/access.log
+  Resultado esperado:
+    - Retorna Estado: PASS.
+    - Alertas de User-Agent de escaneo (Nmap, etc.).
+    - Alerta de rafaga 404 (>=5 peticiones en ventana de 5 minutos).
+
+--------------------------------------------------------------------------------
+5. SUSTENTACION H4: TAMPERING (INTEGRIDAD DE CARGAS EN TRANSITO)
+--------------------------------------------------------------------------------
+Objetivo: Explicar el riesgo de modificacion de payloads sobre HTTP sin TLS.
+
+Punto a Sustentar:
+  - Se demuestra la falta de integridad en la captura de Wireshark (texto plano).
+  - Riesgo registrado como RSK-05 en risk-register.md.
+  - La solucion definitiva requiere cifrado TLS/HTTPS en el Laboratorio 4.
+
+--------------------------------------------------------------------------------
+6. MAPA DE ARCHIVOS Y RUTAS DE EVIDENCIA EN EL REPOSITORIO
+--------------------------------------------------------------------------------
+- Reporte Principal y Sustentacion: README.md
+- Matriz de Amenazas STRIDE: diagrams/stride-table.md
+- Diagrama de Flujo de Datos (DFD): diagrams/architecture-dfd.md
+- Registro de Riesgos: risk-register.md
+- Evidencias Red Team: evidence/red/
+- Evidencias Blue Team: evidence/blue/
+- Evidencias Retest: evidence/retest/
+- Configuraciones Nginx: nginx/muvautomation-before.conf / muvautomation-after.conf
+================================================================================

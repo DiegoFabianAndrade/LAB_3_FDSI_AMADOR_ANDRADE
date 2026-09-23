@@ -67,8 +67,8 @@ Para sustentar el laboratorio en tiempo real frente al docente, ejecute los sigu
 ### 5.1 Sustentación H1 — Information Disclosure (Tráfico en Claro)
 * **Hipótesis**: HTTP transmite sin cifrado en el puerto 80 a través de la frontera **TB-01**, exponiendo el inventario de activos.
 * **Comando para mostrar evidencia**:
-  1. Abrir [evidence/blue/lab3-http.pcap](evidence/blue/lab3-http.pcap) en **Wireshark**.
-  2. Aplicar filtro: `http` (o `tcp.stream eq 11`).
+  1. Abrir [evidence/blue/lab3-http.pcap](evidence/blue/lab3-http.pcap) o capturar en vivo en **Wireshark**.
+  2. Aplicar filtro: `http` (o `tcp.stream eq 14`).
   3. Clic derecho en el paquete `GET /public-inventory.txt` -> **Follow** -> **HTTP Stream**.
   4. Mostrar el texto plano de los activos (`WEB-LAB-01`, `API-LAB-01`, `DB-LAB-01`).
 * **Tratamiento de Riesgo**: Mitigado en [public-inventory.txt](public-inventory.txt) y registrado como riesgo aceptado en [risk-register.md](risk-register.md) (RSK-05) pendiente para HTTPS en Lab 4.
