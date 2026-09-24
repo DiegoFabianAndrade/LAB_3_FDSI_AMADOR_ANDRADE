@@ -35,25 +35,66 @@ const alertStore = [
 ];
 
 const actionLogs = [];
+const ROOT_DIR = path.resolve(__dirname, '..');
 
 const serveStaticFile = (res, relativeFilePath, contentType) => {
-  const fullPath = path.join(__dirname, '..', relativeFilePath);
-  if (fs.existsSync(fullPath)) {
-    res.writeHead(200, { 'Content-Type': `${contentType}; charset=utf-8` });
-    return res.end(fs.readFileSync(fullPath, 'utf-8'));
+  const fullPath = path.resolve(ROOT_DIR, relativeFilePath);
+  
+  // Prevención de Path Traversal
+  if (!fullPath.startsWith(ROOT_DIR)) {
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ error: "403 Forbidden", message: "Acceso no autorizado fuera de la raíz." }));
   }
+
+  if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+    res.writeHead(200, { 'Content-Type': `${contentType}; charset=utf-8` });
+    return res.end(fs.readFileSync(fullPath));
+  }
+  
   res.writeHead(404, { 'Content-Type': 'application/json' });
-  return res.end(JSON.stringify({ error: "Archivo no encontrado en el servidor local" }));
+  return res.end(JSON.stringify({ error: "404 Not Found", message: "Archivo no encontrado en el servidor local" }));
 };
 
+// Lista de firmas de escáneres automáticos prohibidos
+const SUSPICIOUS_UA_PATTERNS = [/sqlmap/i, /nikto/i, /gobuster/i, /dirb/i, /wpscan/i, /masscan/i, /acunetix/i, /nessus/i];
+
 const requestHandler = (req, res) => {
+  // Cabeceras de Seguridad Hardened
   res.setHeader('X-Lab-Environment', 'LAB3-HTTP-UNAUTHENTICATED');
   res.setHeader('X-Falcon-Mock-Engine', 'Active');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Content-Security-Policy', "default-src 'self' 'unsafe-inline'; object-src 'none';");
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Server', 'MuVAutomation-Security-Gateway');
+
+  // Validar Métodos HTTP Permitidos
+  if (!['GET', 'HEAD', 'POST'].includes(req.method)) {
+    res.writeHead(405, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ error: "405 Method Not Allowed", message: "Método HTTP no permitido en este servidor." }));
+  }
+
+  const userAgent = req.headers['user-agent'] || '';
+
+  // Bloqueo proactivo de escáneres automáticos de explotación
+  for (const pattern of SUSPICIOUS_UA_PATTERNS) {
+    if (pattern.test(userAgent)) {
+      res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+      return res.end(JSON.stringify({ error: "403 Forbidden", message: "Acceso denegado por políticas de protección de aplicación." }));
+    }
+  }
 
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = parsedUrl.pathname;
+  const pathname = path.normalize(parsedUrl.pathname).replace(/\\/g, '/');
 
-  console.log(`[REGISTRO] ${new Date().toISOString()} | ${req.method} ${pathname} | User-Agent: ${req.headers['user-agent'] || 'Desconocido'}`);
+  // Prevención de acceso directo a rutas ocultas o archivos sensibles (.git, .env, .conf)
+  if (pathname.includes('/.') || pathname.endsWith('.env') || pathname.endsWith('.conf') || pathname.endsWith('.bak')) {
+    res.writeHead(403, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ error: "403 Forbidden", message: "Acceso a metadatos sensibles denegado." }));
+  }
+
+  console.log(`[REGISTRO] ${new Date().toISOString()} | ${req.method} ${pathname} | User-Agent: ${userAgent || 'Desconocido'}`);
 
   if (req.method === 'GET' && pathname === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -262,14 +303,28 @@ Payload de consulta:
 
   if (req.method === 'POST' && pathname === '/api/v1/alerts/postaggregates') {
     let body = '';
-    req.on('data', chunk => body += chunk.toString());
+    let bodySize = 0;
+    const MAX_SIZE = 102400; // 100 KB max payload
+
+    req.on('data', chunk => {
+      bodySize += chunk.length;
+      if (bodySize > MAX_SIZE) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: "413 Payload Too Large", message: "Carga útil supera el límite permitido de 100KB." }));
+        req.destroy();
+        return;
+      }
+      body += chunk.toString();
+    });
+
     req.on('end', () => {
+      if (res.writableEnded) return;
       let parsedBody = {};
-      try { parsedBody = body ? JSON.parse(body) : {}; } catch (e) { parsedBody = { raw: body }; }
+      try { parsedBody = body ? JSON.parse(body) : {}; } catch (e) { parsedBody = {}; }
 
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       return res.end(JSON.stringify({
-        meta: { status: 200, filtro_solicitado: parsedBody.filter || "ninguno", timestamp: new Date().toISOString() },
+        meta: { status: 200, filtro_solicitado: String(parsedBody.filter || "ninguno").substring(0, 100), timestamp: new Date().toISOString() },
         resources: [
           { label: "Distribución por Severidad", buckets: [{ count: alertStore.filter(a => a.severity === 'High').length, value: "High" }, { count: alertStore.filter(a => a.severity === 'Medium').length, value: "Medium" }] },
           { label: "Activos Más Afectados", buckets: [{ count: 1, value: "WEB-LAB-01" }, { count: 1, value: "API-LAB-01" }] }
@@ -281,18 +336,32 @@ Payload de consulta:
 
   if (req.method === 'POST' && pathname === '/api/v1/alerts/escalate') {
     let body = '';
-    req.on('data', chunk => body += chunk.toString());
+    let bodySize = 0;
+    const MAX_SIZE = 102400; // 100 KB max payload
+
+    req.on('data', chunk => {
+      bodySize += chunk.length;
+      if (bodySize > MAX_SIZE) {
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: "413 Payload Too Large", message: "Carga útil supera el límite permitido de 100KB." }));
+        req.destroy();
+        return;
+      }
+      body += chunk.toString();
+    });
+
     req.on('end', () => {
+      if (res.writableEnded) return;
       let payload = {};
       try { payload = JSON.parse(body); } catch (e) {}
 
       const actionRecord = {
         action_id: `act_${Date.now()}`,
-        alert_id: payload.alert_id || "inc_cs_9001",
-        action_type: payload.action_type || "CONTAINMENT_RECOMMENDED",
-        executed_by: payload.executed_by || "BlueTeam-SOAR-Bot",
+        alert_id: String(payload.alert_id || "inc_cs_9001").replace(/[^a-zA-Z0-9_-]/g, ''),
+        action_type: String(payload.action_type || "CONTAINMENT_RECOMMENDED").replace(/[^a-zA-Z0-9_-]/g, ''),
+        executed_by: String(payload.executed_by || "BlueTeam-SOAR-Bot").replace(/[^a-zA-Z0-9_-]/g, ''),
         timestamp: new Date().toISOString(),
-        details: payload.details || "Regla de triaje automatizado detectó escaneo HTTP."
+        details: String(payload.details || "Regla de triaje automatizado detectó escaneo HTTP.").substring(0, 200)
       };
 
       actionLogs.push(actionRecord);

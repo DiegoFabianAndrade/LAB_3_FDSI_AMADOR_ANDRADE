@@ -63,6 +63,12 @@ while ($listener.IsListening) {
 
     $response.Headers.Add("X-Lab-Environment", "LAB3-HTTP-UNAUTHENTICATED")
     $response.Headers.Add("X-Falcon-Mock-Engine", "Active-PowerShell")
+    $response.Headers.Add("X-Content-Type-Options", "nosniff")
+    $response.Headers.Add("X-Frame-Options", "DENY")
+    $response.Headers.Add("Referrer-Policy", "no-referrer")
+    $response.Headers.Add("Content-Security-Policy", "default-src 'self' 'unsafe-inline'; object-src 'none';")
+    $response.Headers.Add("X-XSS-Protection", "1; mode=block")
+    $response.Headers.Add("Server", "MuVAutomation-Security-Gateway")
 
     $path = $request.Url.AbsolutePath
     $method = $request.HttpMethod
