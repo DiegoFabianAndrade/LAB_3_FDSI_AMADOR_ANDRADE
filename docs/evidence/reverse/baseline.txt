@@ -1,0 +1,59 @@
+================================================================================
+LABORATORIO DE INGENIERIA INVERSA - BASELINE FORENSE DE BINARIOS (FDSI 2026)
+================================================================================
+Fecha de Analisis: 2026-09-30
+Plataforma de Analisis: Ubuntu Linux x86-64 (WSL2)
+Integrantes: Diego Fabian Andrade Duran & Felipe Amador Gonzalez
+
+1. VERIFICACION DE INTEGRIDAD Y HASHES SHA-256
+--------------------------------------------------------------------------------
+61e980febe84b1003b5a3b641468e915b984f7fdd835be9828af54233f88c68c  crackme_level1
+8dc5931dfbf74d7371de9ca9ed8cc57bfe0af4521346202dcd1c701dd8b6f4e5  crackme_level2
+c8e638741272a87ee3b30fe8878898c1aa977e6a879a1ec0b271034b5bb9aed3  crackme_level2_stripped
+
+2. IDENTIFICACION DE FORMATO Y ARQUITECTURA (file)
+--------------------------------------------------------------------------------
+crackme_level1:
+  ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=01c8816fe4b791d9ded9a73e62f8f443464716ba, for GNU/Linux 3.2.0, with debug_info, not stripped
+
+crackme_level2:
+  ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=3eb5b89d4b93c6773577b448cd1cc98400e2196b, for GNU/Linux 3.2.0, with debug_info, not stripped
+
+crackme_level2_stripped:
+  ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]=df25a1fa020d404f3512421bfcf8c89b417e8554, for GNU/Linux 3.2.0, stripped
+
+3. ENCABEZADOS ELF (readelf -h)
+--------------------------------------------------------------------------------
+[crackme_level1]
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Entry point address:               0x401060
+
+[crackme_level2]
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Type:                              EXEC (Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Entry point address:               0x401060
+
+[crackme_level2_stripped]
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Type:                              EXEC (Executable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Entry point address:               0x401060
+
+4. CONCLUSIONES DEL BASELINE FORENSE
+--------------------------------------------------------------------------------
+- Todos los binarios son ejecutables ELF de 64 bits para arquitectura x86-64 con enlazado dinamico.
+- Los archivos crackme_level1 y crackme_level2 contienen simbolos de depuracion y nombres de funciones (not stripped), lo que facilita la navegacion estatica y dinamica.
+- El binario crackme_level2_stripped carece de la tabla de simbolos (.symtab / .strtab stripped), exigiendo identificacion por patrones de flujo de control, referencias cruzadas y offsets de memoria.
+================================================================================
