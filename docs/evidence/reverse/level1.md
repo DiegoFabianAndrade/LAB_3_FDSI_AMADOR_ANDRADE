@@ -50,6 +50,8 @@ print_flag
 ### Paso 3: Desensamblado con `objdump`
 Se confirmó la hipótesis mediante el análisis del desensamblado en sintaxis Intel:
 
+![Prueba de ejecución, extracción strings y desensamblado objdump](screenshots/05_level1_strings_objdump.png)
+
 ```bash
 objdump -d -M intel crackme_level1 | grep -A 20 "<main>:"
 ```
@@ -78,6 +80,8 @@ Se probó la contraseña descubierta `REDTEAM-101`:
 ```bash
 ./crackme_level1 REDTEAM-101
 ```
+
+![Obtención de la FLAG e inspección de sección .rodata con readelf](screenshots/06_level1_flag_readelf_rodata.png)
 
 **Resultado Obtenido:**
 ```text

@@ -12,6 +12,13 @@ Este informe documenta el análisis de ingeniería inversa estático y dinámico
 | `crackme_level2` | `8dc5931dfbf74d7371de9ca9ed8cc57bfe0af4521346202dcd1c701dd8b6f4e5` | ELF 64-bit LSB executable, x86-64, dynamically linked | Not Stripped (Debug Info) |
 | `crackme_level2_stripped` | `c8e638741272a87ee3b30fe8878898c1aa977e6a879a1ec0b271034b5bb9aed3` | ELF 64-bit LSB executable, x86-64, dynamically linked | Stripped (No Symbols) |
 
+![Baseline Forense - Permisos, Tipo de Archivo y Hashes SHA256](docs/evidence/reverse/screenshots/01_baseline_file_sha256.png)
+
+#### Encabezados ELF Identificados (`readelf -h`)
+![readelf crackme_level1](docs/evidence/reverse/screenshots/02_readelf_level1.png)
+![readelf crackme_level2](docs/evidence/reverse/screenshots/03_readelf_level2.png)
+![Permisos ejecución y Entry Point](docs/evidence/reverse/screenshots/04_chmod_readelf_entry.png)
+
 ---
 
 ## 2. Nivel 1 — Recon ("Strings Are Evidence")
@@ -19,10 +26,14 @@ Este informe documenta el análisis de ingeniería inversa estático y dinámico
 ### 2.1 Inspección y Formulación de Hipótesis
 Mediante la ejecución de `strings -n 5 crackme_level1`, se identificó la constante de texto `REDTEAM-101` almacenada en claro en la sección de datos del binario. El desensamblado con `objdump -d -M intel crackme_level1` reveló una llamada directa a `strcmp` comparando el parámetro ingresado por el usuario (`argv[1]`) con dicha constante.
 
+![Prueba de ejecución, strings y desensamblado objdump en Nivel 1](docs/evidence/reverse/screenshots/05_level1_strings_objdump.png)
+
 ### 2.2 Validación y FLAG
 - **Comando de Verificación:** `./crackme_level1 REDTEAM-101`
 - **Contraseña:** `REDTEAM-101`
 - **FLAG Nivel 1:** `FLAG{strings_are_evidence}`
+
+![Obtención de la FLAG Nivel 1 e inspección de .rodata con readelf](docs/evidence/reverse/screenshots/06_level1_flag_readelf_rodata.png)
 
 ---
 
