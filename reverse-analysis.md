@@ -40,10 +40,12 @@ Mediante la ejecución de `strings -n 5 crackme_level1`, se identificó la const
 ## 3. Nivel 2 — Reverse Engineering & Decompilador Ghidra
 
 ### 3.1 Análisis de la Lógica de Validación
-El análisis del binario `crackme_level2` desveló que la clave no se almacena en texto plano. La rutina `validate_key` realiza los siguientes pasos:
+El análisis del binario `crackme_level2` en Ghidra desveló que la clave no se almacena en texto plano. La rutina `validate_key` realiza los siguientes pasos:
 1. Comprueba que la longitud de la cadena sea de 17 caracteres (`0x11` en `strlen`).
 2. Aplica una transformación XOR byte a byte combinando el carácter ingresado `candidate[i]` con un elemento del arreglo de máscara de 4 bytes `k = [0x23, 0x51, 0x17, 0x6a]` indexado por `i % 4`.
 3. Compara el byte resultante con un arreglo esperado de 17 bytes en `.rodata`: `expected = [0x65, 0x15, 0x44, 0x23, 0x0e, 0x03, 0x52, 0x3c, 0x66, 0x03, 0x44, 0x2f, 0x0e, 0x63, 0x27, 0x58, 0x15]`.
+
+![Decompilación de validate_key en Ghidra con variables renombradas y análisis de flujo](docs/evidence/reverse/screenshots/11_level2_ghidra_decompiler.png)
 
 ### 3.2 Pseudocódigo Reconstruido
 

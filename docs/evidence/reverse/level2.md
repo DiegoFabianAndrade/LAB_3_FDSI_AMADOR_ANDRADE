@@ -14,7 +14,9 @@ Se ejecutó `strings -n 5 crackme_level2` observando que la clave secreta ya no 
 - Rutina de éxito: `reveal_flag`
 
 ### Paso 2: Análisis del Flujo en `validate_key`
-Se inspeccionó la función `validate_key` mediante desensamblado e importación en Ghidra:
+Se inspeccionó la función `validate_key` mediante desensamblado e importación en Ghidra, renombrando variables según la lógica deducida (`candidate`, `score`, `i`, `transformed`):
+
+![Decompilación de validate_key en Ghidra con variables renombradas](screenshots/11_level2_ghidra_decompiler.png)
 
 ```assembly
 0000000000401156 <validate_key>:
