@@ -5,72 +5,31 @@ Demostrar mediante la ejecución en tiempo real con **GDB (GNU Debugger)** la va
 
 ---
 
-## 2. Sesión GDB con Binario Simbólico (`crackme_level2`)
+### Evidencia Visual de la Sesión Dinámica en GDB
+A continuación se presenta la captura de la sesión real interactiva en GDB ejecutada en Ubuntu WSL2 sobre `crackme_level2`:
 
-### Paso 1: Inicialización y Configuración
-```bash
-gdb ./crackme_level2
-```
-```gdb
-(gdb) set disassembly-flavor intel
-(gdb) break validate_key
-Breakpoint 1 at 0x401162: file crackme_level2.c, line 10.
-```
+![Sesión interactiva en GDB con punto de interrupción, inspección de registros y validación de casos](screenshots/12_gdb_dynamic_validation.png)
 
-### Paso 2: Prueba de Caso Fallido (`AAAA`)
-```gdb
-(gdb) run AAAA
-[Thread debugging using libthread_db enabled]
+### Desglose y Análisis Técnico de la Sesión:
 
-Breakpoint 1, validate_key (candidate=0x7fffffffe9ef "AAAA") at crackme_level2.c:10
-(gdb) info registers rdi rax
-rdi            0x7fffffffe9ef      140737488349679
-rax            0x7fffffffe9ef      140737488349679
-(gdb) continue
-=== FDSI CrackMe Level 2 ===
-Hint: static + dynamic analysis.
-Invalid license.
-[Inferior 1 (process 1091) exited with code 03]
-```
+1. **Punto de Interrupción (`break validate_key`):**
+   - Se estableció el breakpoint en la dirección `0x401162`, correspondiente al inicio del bloque de validación en `crackme_level2`.
 
-**Análisis:**
-- El registro `rdi` almacena el puntero al parámetro ingresado `"AAAA"`.
-- Al evaluar `strlen("AAAA")` (4 bytes) contra `17` (`0x11`), el programa salta a la rutina de fallo y retorna `0` en `eax`.
+2. **Caso Fallido (`run AAAA` → `Invalid license`):**
+   - El ejecutable intercepta la llamada deteniendo la ejecución en `validate_key(candidate="AAAA")`.
+   - **Registros `$rdi` y `$rax`:** El registro `$rdi` contiene el puntero al buffer del primer argumento (`0x7fffffffe08b` apuntando a `"AAAA"`).
+   - **Evaluación:** La función calcula `strlen("AAAA") = 4`. Al compararlo con la longitud requerida de 17 caracteres (`0x11`), la condición falla inmediatamente.
+   - **Resultado:** El acumulador de retorno `$eax` queda en `0`, imprimiendo `Invalid license.` y finalizando con código de salida `03`.
 
-### Paso 3: Inspección de Memoria en GDB
-Inspección de las constantes de memoria en `.rodata`:
-
-```gdb
-(gdb) x/4xb 0x40208b
-0x40208b <k.1>:	0x23	0x51	0x17	0x6a
-
-(gdb) x/17xb 0x402090
-0x402090 <expected.0>:	0x65	0x15	0x44	0x23	0x0e	0x03	0x52	0x3c
-0x402098 <expected.0+8>:	0x66	0x03	0x44	0x2f	0x0e	0x63	0x27	0x58
-0x4020a0 <expected.0+16>:	0x15
-```
-
-### Paso 4: Prueba de Caso Exitoso (`FDSI-REVERSE-2026`)
-```gdb
-(gdb) run FDSI-REVERSE-2026
-[Thread debugging using libthread_db enabled]
-
-Breakpoint 1, validate_key (candidate=0x7fffffffe9e2 "FDSI-REVERSE-2026") at crackme_level2.c:10
-(gdb) info registers rdi rax
-rdi            0x7fffffffe9e2      140737488349666
-rax            0x7fffffffe9e2      140737488349666
-(gdb) continue
-=== FDSI CrackMe Level 2 ===
-Hint: static + dynamic analysis.
-License accepted.
-FLAG{ghidra_plus_gdb}
-[Inferior 1 (process 1130) exited normally]
-```
-
-**Análisis:**
-- La clave `FDSI-REVERSE-2026` cumple la longitud de 17 bytes.
-- En el bucle de acumulación XOR, `score` se mantiene en `0` (acumulado nulo en `or DWORD PTR [rbp-0x4], eax`).
-- El valor de retorno en `eax` resulta en `1` (`sete al`), derivando en la llamada a `reveal_flag()`.
+3. **Caso Exitoso (`run FDSI-REVERSE-2026` → `License accepted.`):**
+   - Se reinicia el proceso con la clave calculada mediante la inversión XOR: `FDSI-REVERSE-2026`.
+   - El breakpoint se activa en `validate_key(candidate="FDSI-REVERSE-2026")`.
+   - **Registros `$rdi` y `$rax`:** El registro `$rdi` almacena el puntero en pila `0x7fffffffe07e` hacia la cadena válida.
+   - **Evaluación:** La longitud es exactamente 17 bytes (`0x11`). El bucle XOR byte a byte procesa cada posición `i` contra `k[i % 4]` y `expected[i]`, resultando en diferencias nulas (`score = 0`).
+   - **Resultado:** La instrucción `sete al` asigna `1` al registro de retorno `$rax`, activando la rama de éxito:
+     - `License accepted.`
+     - **FLAG Obtenida:** `FLAG{ghidra_plus_gdb}`
+     - Proceso finalizado de forma normal (`exited normally`).
 
 ---
 

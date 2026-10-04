@@ -74,6 +74,13 @@ Al aplicar la inversa XOR (`candidate[i] = expected[i] ^ k[i % 4]`), se obtuvo l
 - **Comando de Verificación:** `./crackme_level2 FDSI-REVERSE-2026`
 - **FLAG Nivel 2:** `FLAG{ghidra_plus_gdb}`
 
+### 3.4 Confirmación Dinámica en GDB
+Se ejecutó una sesión interactiva en GDB sobre `crackme_level2` en Ubuntu WSL2 para verificar el comportamiento de la CPU y los registros:
+- **Caso `AAAA` (`Invalid license`):** `$rdi` contiene el puntero al buffer con 4 bytes, fallando la condición de longitud (`strlen == 17`) y retornando `$rax = 0`.
+- **Caso `FDSI-REVERSE-2026` (`License accepted`):** `$rdi` apunta a los 17 bytes de la clave candidata, el bucle XOR evalúa diferencias en cero y retorna `$rax = 1`, liberando la bandera `FLAG{ghidra_plus_gdb}`.
+
+![Confirmación dinámica en GDB: Caso fallido AAAA y caso exitoso FDSI-REVERSE-2026](docs/evidence/reverse/screenshots/12_gdb_dynamic_validation.png)
+
 ---
 
 ## 4. Boss Level — Stripped Binary Analysis (`crackme_level2_stripped`)
