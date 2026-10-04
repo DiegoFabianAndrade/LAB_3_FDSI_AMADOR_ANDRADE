@@ -85,13 +85,39 @@ Se ejecutó una sesión interactiva en GDB sobre `crackme_level2` en Ubuntu WSL2
 
 ## 4. Boss Level — Stripped Binary Analysis (`crackme_level2_stripped`)
 
-### 4.1 Impacto de Stripping
-Al remuever los símbolos con `strip`, desaparecen las entradas `.symtab` y `.strtab`. Herramientas como `nm` retornan `no symbols` y GDB no reconoce nombres de función como `validate_key` o `reveal_flag`.
+### 4.1 Evidencia en Consola del Binario Stripped
+A continuación se presenta la captura de la verificación en terminal de `crackme_level2_stripped`:
 
-### 4.2 Técnica de Análisis por Referencias y Offsets
-- Se ubicó la función `main` rastreando la llamada desde `_start` a `__libc_start_main` (`0x401060` -> parámetro en `rdi` apunta a `main` en `0x4011d6`).
-- Dentro de `main`, la llamada a `call 0x401156` ejecuta la rutina de validación.
-- Al ejecutar `./crackme_level2_stripped FDSI-REVERSE-2026`, se confirmó la misma lógica y se obtuvo exitosamente la **FLAG**: `FLAG{ghidra_plus_gdb}`.
+![Inspección estática y ejecución exitosa del binario stripped](docs/evidence/reverse/screenshots/13_boss_level_stripped.png)
+
+### 4.2 Desglose y Análisis Técnico de Comandos:
+
+1. **`file crackme_level2_stripped`:**
+   - **Salida:** `ELF 64-bit LSB executable, x86-64, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, ..., stripped`.
+   - **Explicación:** Confirma que el ejecutable es un binario ELF x86-64 y que ha pasado por el proceso de *stripping*, lo que descarta cabeceras de símbolos de depuración y tablas no requeridas por el cargador del sistema operativo.
+
+2. **`nm crackme_level2_stripped`:**
+   - **Salida:** `nm: crackme_level2_stripped: no symbols`.
+   - **Explicación:** Demuestra formalmente que las secciones `.symtab` y `.strtab` fueron suprimidas. A diferencia del Nivel 2 original, utilidades de inspección estándar no pueden asociar direcciones de memoria con nombres de función como `validate_key`, `reveal_flag` o `main`.
+
+3. **`strings -n 5 crackme_level2_stripped | head -n 12`:**
+   - **Salida:** Muestra las dependencias dinámicas (`libc.so.6`), funciones importadas de biblioteca (`strlen`, `printf`, `putchar`) y mensajes del programa (`=== FDSI CrackMe Level 2 ===`, `Hint: static + dynamic analysis.`).
+   - **Explicación:** Evidencia que el comando `strip` solo elimina símbolos de enlace/depuración, pero no cifra ni altera los literales de cadena almacenados en la sección `.rodata`.
+
+4. **`./crackme_level2_stripped FDSI-REVERSE-2026`:**
+   - **Salida:**
+     ```text
+     === FDSI CrackMe Level 2 ===
+     Hint: static + dynamic analysis.
+     License accepted.
+     FLAG{ghidra_plus_gdb}
+     ```
+   - **Explicación:** Demuestra de forma concluyente que la lógica de validación algorítmica y la rutina de revelado de bandera residen intactas en las instrucciones del binario. Al proporcionar la clave derivada en el análisis estático (`FDSI-REVERSE-2026`), el control de flujo valida el algoritmo XOR y libera con éxito la bandera `FLAG{ghidra_plus_gdb}`.
+
+### 4.3 Técnica de Análisis por Referencias y Offsets
+- **Localización de `main`:** Al carecer de símbolo `main`, se rastrea el punto de entrada `_start` (`0x401060`), el cual pasa a `__libc_start_main` el puntero de la función de inicio en el registro `rdi` (dirección `0x4011d6`).
+- **Localización de la rutina de validación:** Dentro de la función `0x4011d6`, se identifica la instrucción `call 0x401156` inmediatamente antes de la comparación de éxito, correspondiente a la lógica original de `validate_key`.
+- **Depuración dinámica:** En GDB se fijan breakpoints absolutos por dirección de memoria (`break *0x401156`), permitiendo inspeccionar la ejecución incluso sin nombres simbólicos.
 
 ---
 

@@ -59,6 +59,16 @@ FLAG{ghidra_plus_gdb}
 [Inferior 1 (process 1251) exited normally]
 ```
 
+### Evidencia de Terminal y Ejecución del Binario Stripped
+A continuación se ilustra la comprobación forense con `file`, `nm`, `strings` y la ejecución exitosa del ejecutable `crackme_level2_stripped`:
+
+![Inspección estática y ejecución exitosa del binario stripped](screenshots/13_boss_level_stripped.png)
+
+- **`file`:** Confirma que el ejecutable es un binario ELF x86-64 `stripped` (sin símbolos).
+- **`nm`:** Retorna `no symbols`, evidenciando que las entradas `.symtab` y `.strtab` fueron eliminadas.
+- **`strings`:** Demuestra que los literales de texto de la biblioteca y mensajes de interfaz se preservan en `.rodata`.
+- **Ejecución:** Con la clave `FDSI-REVERSE-2026`, se produce `License accepted.` y se extrae la misma `FLAG{ghidra_plus_gdb}`.
+
 ---
 
 ## 4. Conclusión de la Verificación Dinámica
