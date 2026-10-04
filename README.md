@@ -117,15 +117,37 @@ gdb ./crackme_level2
 
 ---
 
-## 🎤 Guión de Sustentación en Vivo (3 Minutos)
+## 🧠 Respuestas Oficiales a las Preguntas de Análisis
+
+### 1. ¿Qué información pudiste obtener sin ejecutar el binario?
+Mediante análisis estático con `file`, `sha256sum`, `readelf`, `strings`, `objdump` y decompilación en `Ghidra`:
+- **Metadatos y Formato:** ELF 64-bit x86-64, enlazado dinámico con `libc.so.6`, intérprete del sistema `/lib64/ld-linux-x86-64.so.2` y hashes SHA-256 de integridad.
+- **Cadenas de Texto (`.rodata`):** Contraseña en texto claro del Nivel 1 (`REDTEAM-101`), llamadas de biblioteca (`strlen`, `printf`) y mensajes de interfaz.
+- **Símbolos y Algoritmo:** Nombres de funciones (`validate_key`, `reveal_flag`), condición estricta de longitud (`strlen == 17`), la máscara de 4 bytes `k = [0x23, 0x51, 0x17, 0x6a]` y el arreglo esperado, permitiendo derivar la clave `FDSI-REVERSE-2026` sin ejecutar el binario.
+
+### 2. ¿Por qué una contraseña compilada como string es un diseño inseguro?
+Porque los literales de cadena se almacenan directamente en texto plano en la sección `.rodata` o `.data` del binario compilado. Cualquier usuario o atacante puede extraerlos en segundos con herramientas básicas como `strings` o editores hexadecimales sin necesidad de depurar, desensamblar ni ejecutar el programa (*violación del Principio de Kerckhoffs y Security by Obscurity*).
+
+### 3. ¿Qué cambió entre `crackme_level2` y `crackme_level2_stripped`?
+El proceso de *stripping* eliminó permanentemente las tablas de símbolos `.symtab` y `.strtab`. `nm` devuelve `no symbols`, GDB no reconoce nombres como `validate_key` y Ghidra asigna nombres por dirección (`FUN_00401156`). Sin embargo, el código máquina y la lógica XOR permanecen intactos, resolviéndose mediante rastreo del flujo de control desde `_start` (`0x401060`) -> `__libc_start_main` (`0x4011d6`) -> `0x401156`.
+
+### 4. ¿Qué ventaja tuvo Ghidra sobre `objdump`?
+Ghidra ofrece decompilación a pseudocódigo de alto nivel similar a C (reconstruyendo bucles `for`, sentencias `if/else`), inferencia de tipos de datos, renombrado interactivo de variables locales (`candidate`, `score`, `i`), grafo de flujo de control visual y mapeo instantáneo de referencias cruzadas (XREFs), frente a la salida plana en mnemónicos de ensamblador de `objdump`.
+
+### 5. ¿Qué confirmó GDB que el análisis estático por sí solo no demostraba?
+GDB confirmó en tiempo real el comportamiento dinámico del proceso: el paso de argumentos en el registro `$rdi` en el stack, la bifurcación condicional ante la longitud inválida de `AAAA` retornando error `03`, y el retorno exitoso `$rax = 1` ante la clave reconstruida `FDSI-REVERSE-2026`, validando experimentalmente la hipótesis teórica.
+
+---
+
+## 🎤 Guión de Sustentación en Vivo (Cierre de 3 Minutos por Equipo)
 
 1. **Qué observamos inicialmente (0:00 - 0:40):**
    - Registramos hashes SHA-256 e identificamos binarios ELF x86-64. En `crackme_level1`, `strings` expuso la clave `REDTEAM-101` y la `FLAG{strings_are_evidence}`.
 2. **Qué hipótesis formulamos (0:40 - 1:15):**
-   - En `crackme_level2`, la clave no estaba en texto plano. Formulamos la hipótesis de que se aplicaba una transformación XOR byte a byte con una máscara fija de 4 bytes (`k`).
+   - En `crackme_level2`, la clave no estaba en texto plano. Formulamos la hipótesis de que se aplicaba una transformación XOR byte a byte con una máscara fija de 4 bytes (`k = [0x23, 0x51, 0x17, 0x6a]`).
 3. **Qué función o condición encontramos (1:15 - 1:55):**
    - En Ghidra y `objdump` localizamos `validate_key()`, identificando la longitud de 17 bytes (`0x11`) y la comparación `candidate[i] ^ k[i % 4]` contra la matriz `expected`. Invertimos la operación obteniendo `FDSI-REVERSE-2026`.
 4. **Cómo la confirmamos en ejecución (1:55 - 2:30):**
    - Con GDB pusimos breakpoints en `validate_key` (y offset `*0x401156` en la versión *stripped*). Confirmamos que con la clave candidata el registro de retorno `$rax` pasa a `1` y entrega la `FLAG{ghidra_plus_gdb}`.
-5. **Enseñanza de Desarrollo Seguro (2:30 - 3:00):**
-   - La verificación local o la ofuscación de secretos en binarios cliente es insegura. La validación de licencias debe realizarse en servidores remotos autenticados mediante cifrado asimétrico.
+5. **Qué enseñanza de desarrollo seguro extraemos (2:30 - 3:00):**
+   - La verificación local o la ofuscación de secretos en binarios cliente es insegura (*Security by Obscurity*). La validación de licencias debe realizarse en servidores remotos autenticados mediante cifrado asimétrico y TLS.

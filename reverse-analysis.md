@@ -135,19 +135,36 @@ A continuación se presenta la captura de la verificación en terminal de `crack
 ## 6. Preguntas de Análisis Oficiales
 
 ### 1. ¿Qué información pudiste obtener sin ejecutar el binario?
-Mediante inspección estática (`file`, `sha256sum`, `readelf`, `strings`, `objdump` / Ghidra) se obtuvieron los hashes de integridad, arquitectura x86-64, enlazado dinámico, símbolos de depuración, cadenas de texto embebidas y el grafo de flujo de control con las operaciones aritméticas XOR del algoritmo de validación.
+Mediante análisis estático preliminar con `file`, `sha256sum`, `readelf`, `strings`, `objdump` y decompilación en `Ghidra` se extrajo:
+- **Metadatos y Arquitectura:** Formato ejecutable ELF de 64 bits para arquitectura x86-64, orden de bytes *little-endian*, enlazado dinámico con `libc.so.6`, intérprete del sistema `/lib64/ld-linux-x86-64.so.2` y presencia de símbolos DWARF.
+- **Hashes de Integridad:** Identificación criptográfica única (SHA-256) de cada archivo para garantizar reproducibilidad y auditoría forense.
+- **Cadenas de Texto Embebidas (`.rodata`):** En el Nivel 1 se extrajo la contraseña en texto plano (`REDTEAM-101`) y mensajes de interfaz; en el Nivel 2 se identificaron los mensajes de consola y llamadas a funciones de biblioteca estándar (`strlen`, `printf`, `putchar`).
+- **Tabla de Símbolos:** Nombres y direcciones de funciones críticas (`main`, `validate_key`, `reveal_flag`).
+- **Estructura y Algoritmo de Validación:** Se identificó la condición estricta de longitud (`strlen == 17` / `0x11`), la máscara cíclica de 4 bytes (`k = [0x23, 0x51, 0x17, 0x6a]`), el arreglo esperado de 17 bytes (`expected`) y la operación `(candidate[i] ^ k[i % 4]) ^ expected[i] == 0`, permitiendo despejar y derivar la clave matemáticamente antes de iniciar cualquier ejecución.
 
 ### 2. ¿Por qué una contraseña compilada como string es un diseño inseguro?
-Porque las cadenas de texto dentro de un binario no cifrado se almacenan directamente en la sección `.rodata` o `.data`, permitiendo que cualquier usuario o atacante las extraiga en texto plano en segundos con utilidades simples como `strings` o desensambladores, sin necesidad de ejecutar ni depurar el programa.
+Porque en los lenguajes compilados tradicionales (como C o C++), los literales de cadena se almacenan directamente en las secciones de solo lectura (`.rodata`) o datos (`.data`) del binario compilado sin ninguna capa de cifrado:
+1. **Facilidad Trivial de Extracción:** Cualquier usuario o atacante puede extraer los secretos en segundos utilizando herramientas elementales como `strings`, visores hexadecimales o `readelf -x .rodata`, sin necesidad de depurar, desensamblar ni ejecutar el archivo.
+2. **Violación del Principio de Kerckhoffs:** La seguridad de un sistema no puede basarse en asumir que el usuario no abrirá el archivo binario (*Security by Obscurity*). El software distribuido al cliente se encuentra en un entorno de hostilidad no confiable donde el usuario tiene control total sobre la memoria y el almacenamiento.
 
 ### 3. ¿Qué cambió entre `crackme_level2` y `crackme_level2_stripped`?
-El proceso de *stripping* eliminó la tabla de símbolos y la información de depuración DWARF. Los nombres de variables (`candidate`, `expected`, `k`) y funciones (`validate_key`, `reveal_flag`) fueron removidos, forzando la navegación por direcciones absolutas de memoria (`0x401156`) y análisis de patrones de flujo en ensamblador.
+- **Remoción de Metadatos de Depuración y Símbolos:** El proceso de *stripping* (`strip`) eliminó permanentemente las secciones `.symtab` (Symbol Table) y `.strtab` (String Table).
+- **Impacto en Herramientas de Análisis:**
+  - `nm crackme_level2_stripped` devuelve `no symbols`.
+  - GDB no puede resolver nombres de función (`Function "validate_key" not defined`).
+  - Ghidra no cuenta con identificadores simbólicos y asigna nombres genéricos por dirección (`FUN_00401156`).
+- **Lo que NO cambió:** El código máquina, los opcodes x86-64, la lógica del bucle XOR, los datos en `.rodata` y el comportamiento del programa permanecen idénticos. Para analizarlo, se utilizó navegación por flujo de control desde `_start` (`0x401060`) pasando por el argumento `rdi` de `__libc_start_main` (`0x4011d6`), y puntos de interrupción en GDB por dirección de memoria (`break *0x401156`).
 
 ### 4. ¿Qué ventaja tuvo Ghidra sobre `objdump`?
-Ghidra ofrece decompilación avanzada a pseudocódigo de alto nivel similar a C, reconstrucción de estructuras de datos, grafo visual del flujo de control, análisis de referencias cruzadas (XREFs) y renombrado dinámico de variables, mientras que `objdump` solo ofrece el desensamblado plano en mnemónicos de ensamblador.
+1. **Decompilación a C de Alto Nivel:** Mientras que `objdump` únicamente ofrece el desensamblado en mnemónicos de ensamblador x86-64 (`mov`, `cmp`, `jb`, `xor`), Ghidra reconstruye el algoritmo a pseudocódigo legible en C con estructuras de control de alto nivel (`for`, `if/else`, arrays).
+2. **Inferencia y Renombrado Dinámico:** Ghidra infiere tipos de datos (`char*`, `size_t`, `uint`) y permite renombrar dinámicamente variables y argumentos en la interfaz (`candidate`, `score`, `i`), propagando la claridad en todo el análisis.
+3. **Referencias Cruzadas (XREFs):** Ghidra mapea instantáneamente en qué partes del binario se llama o referencia cada función, literal o dirección de memoria.
+4. **Grafo de Flujo de Control Visual (CFG):** Permite inspeccionar interactivamente las bifurcaciones y ramas de salto condicional del código.
 
 ### 5. ¿Qué confirmó GDB que el análisis estático por sí solo no demostraba?
-GDB confirmó en tiempo de ejecución los valores reales cargados en los registros de la CPU (`$rdi`, `$rax`), el recorrido exacto de los saltos condicionales (`je`, `jb`) ante entradas válidas e inválidas, y la respuesta del proceso en memoria en cada paso.
+1. **Estado Real de Registros y CPU:** GDB comprobó en memoria y tiempo real el estado exacto de los registros: `$rdi` apuntando a las cadenas en el stack y `$rax` recibiendo el resultado booleano (`0` para clave inválida, `1` para clave aceptada).
+2. **Comportamiento Dinámico de Saltos Condicionales:** Demostró el recorrido en vivo del programa: ante la clave fallida `AAAA`, evaluó la longitud de 4 bytes contra 17 (`0x11`), tomando la rama de fallo (`Invalid license`); ante `FDSI-REVERSE-2026`, recorrió las 17 iteraciones XOR sin acumular diferencias en `score` y activó la llamada a `reveal_flag()`.
+3. **Verificación Experimental Libre de Suposiciones:** Permitió validar empíricamente que la clave calculada funcionaba de manera efectiva en el entorno real de ejecución de la máquina host.
 
 ### 6. ¿Por qué Burp Suite no es una herramienta de ingeniería inversa de binarios?
 Porque Burp Suite es un proxy de aplicación web diseñado para interceptar, modificar y analizar tráfico HTTP/HTTPS en la capa de red/aplicación, mientras que la ingeniería inversa de binarios analiza instrucciones binarias compiladas a nivel de procesador y memoria local.
